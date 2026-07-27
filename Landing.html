@@ -1,0 +1,1003 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ReportBridge - Login</title>
+<link rel="icon" href="/logo.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;500;600;700&family=Playfair+Display:wght@500;600;700&display=swap" rel="stylesheet">
+<script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+<script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+<script src="https://unpkg.com/@babel/standalone@7.22.5/babel.min.js"></script>
+<style>
+  :root {
+    --bg: #f3ede6;
+    --bg-alt: #e6edf7;
+    --surface: rgba(255, 255, 255, 0.72);
+    --surface-strong: rgba(255, 255, 255, 0.9);
+    --surface-soft: rgba(255, 255, 255, 0.56);
+    --text: #122538;
+    --muted: #556679;
+    --line: rgba(18, 37, 56, 0.12);
+    --accent: #0f6cbd;
+    --accent-2: #f08a24;
+    --accent-3: #18324d;
+    --good: #14845f;
+    --glow: rgba(15, 108, 189, 0.18);
+    --badge-bg: rgba(240, 138, 36, 0.12);
+    --badge-text: #b36216;
+    --shadow: 0 30px 80px rgba(18, 37, 56, 0.16);
+    --font-body: "Source Sans 3", sans-serif;
+    --font-display: "Playfair Display", serif;
+    --text-title: clamp(1.45rem, 2vw, 2rem);
+    --text-panel: 0.92rem;
+    --text-body: 0.98rem;
+    --radius-xl: 32px;
+    --radius-lg: 24px;
+    --radius-md: 18px;
+    --radius-sm: 12px;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; min-height: 100%; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: var(--font-body);
+    color: var(--text);
+    background:
+      radial-gradient(circle at top left, color-mix(in srgb, var(--accent) 15%, transparent), transparent 28%),
+      radial-gradient(circle at right 20%, color-mix(in srgb, var(--accent-2) 22%, transparent), transparent 22%),
+      linear-gradient(140deg, var(--bg) 0%, var(--bg-alt) 100%);
+    transition: background 180ms ease, color 180ms ease;
+  }
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(255,255,255,0.18) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.18) 1px, transparent 1px);
+    background-size: 34px 34px;
+    mask-image: radial-gradient(circle at center, black 48%, transparent 100%);
+    pointer-events: none;
+  }
+  button, input { font: inherit; }
+  .shell {
+    width: min(1380px, calc(100% - 34px));
+    margin: 0 auto;
+    padding: 24px 0 48px;
+    position: relative;
+    animation: fade-up .45s ease;
+  }
+  .nav {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 20px;
+    margin-bottom: 28px;
+    padding: 16px 18px;
+    border: 1px solid rgba(255,255,255,0.42);
+    border-radius: 24px;
+    background: var(--surface);
+    backdrop-filter: blur(16px);
+    box-shadow: 0 20px 56px rgba(18, 37, 56, 0.12);
+  }
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    max-width: 720px;
+  }
+  .brand img {
+    width: 150px;
+    height: 75px;
+    object-fit: contain;
+    border-radius: 0;
+    padding: 0;
+    box-shadow: none;
+    background: transparent;
+    margin-right: -8px;
+  }
+  .brand h1 {
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: var(--text-title);
+    letter-spacing: -0.04em;
+  }
+  .brand p {
+    margin: 6px 0 0;
+    color: var(--muted);
+    font-size: var(--text-body);
+    max-width: 62ch;
+    line-height: 1.45;
+  }
+  .nav-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    align-self: center;
+  }
+  .chip {
+    border: 1px solid var(--line);
+    padding: 9px 13px;
+    border-radius: 999px;
+    background: var(--surface-soft);
+    color: var(--muted);
+    backdrop-filter: blur(14px);
+    font-size: 0.92rem;
+    font-weight: 600;
+  }
+  .settings-toggle,
+  .ghost-btn,
+  .primary-btn,
+  .secondary-btn {
+    border: none;
+    cursor: pointer;
+    transition: transform 160ms ease, box-shadow 160ms ease, background 160ms ease;
+  }
+  .settings-toggle:hover,
+  .ghost-btn:hover,
+  .primary-btn:hover,
+  .secondary-btn:hover { transform: translateY(-1px); }
+  .settings-toggle,
+  .ghost-btn,
+  .secondary-btn {
+    background: var(--surface-strong);
+    color: var(--text);
+    border-radius: 999px;
+    padding: 11px 15px;
+    border: 1px solid var(--line);
+    font-weight: 700;
+  }
+  .hero {
+    display: grid;
+    grid-template-columns: minmax(0, 1.08fr) minmax(390px, 0.92fr);
+    gap: 24px;
+    align-items: stretch;
+  }
+  .panel {
+    border: 1px solid rgba(255,255,255,0.42);
+    background: var(--surface);
+    backdrop-filter: blur(20px);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow);
+    transition: transform .2s ease, box-shadow .2s ease;
+  }
+  .motion-enabled .panel {
+    animation: fade-up .48s ease;
+  }
+  .motion-enabled .hero > .panel:nth-child(1) { animation-delay: .06s; }
+  .motion-enabled .hero > .panel:nth-child(2) { animation-delay: .14s; }
+  .motion-enabled .lower-grid > .panel:nth-child(1) { animation-delay: .1s; }
+  .motion-enabled .lower-grid > .panel:nth-child(2) { animation-delay: .18s; }
+  .panel:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 34px 92px rgba(18, 37, 56, 0.2);
+  }
+  .hero-copy {
+    padding: 30px;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    overflow: hidden;
+  }
+  .eyebrow {
+    width: fit-content;
+    padding: 8px 14px;
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--accent) 10%, white);
+    color: var(--accent);
+    font-size: 0.84rem;
+    font-weight: 700;
+    letter-spacing: 0.01em;
+  }
+  .hero-copy h2 {
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: clamp(2.2rem, 3.9vw, 4.25rem);
+    line-height: 0.94;
+    letter-spacing: -0.045em;
+    max-width: 11.8ch;
+  }
+  .hero-copy p {
+    margin: 0;
+    max-width: 70ch;
+    color: var(--muted);
+    line-height: 1.62;
+    font-size: 0.98rem;
+  }
+  .cta-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .primary-btn,
+  .secondary-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    border-radius: 999px;
+    padding: 14px 20px;
+    font-weight: 700;
+    text-decoration: none;
+  }
+  .primary-btn {
+    background: linear-gradient(135deg, color-mix(in srgb, var(--accent) 92%, black), color-mix(in srgb, var(--accent) 66%, var(--accent-3)));
+    color: white;
+    box-shadow: 0 18px 32px var(--glow);
+  }
+  .secondary-btn {
+    background: var(--surface-strong);
+    color: var(--text);
+    border: 1px solid var(--line);
+  }
+  .stat-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 14px;
+  }
+  .stat-card {
+    padding: 14px;
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--line);
+    background: var(--surface-soft);
+    transition: transform .16s ease, border-color .16s ease;
+  }
+  .stat-card:hover {
+    transform: translateY(-2px);
+    border-color: color-mix(in srgb, var(--accent) 38%, var(--line));
+  }
+  .stat-card strong {
+    display: block;
+    font-family: var(--font-display);
+    font-size: 1.45rem;
+    margin-bottom: 6px;
+  }
+  .stat-card span {
+    color: var(--muted);
+    font-size: 0.88rem;
+    line-height: 1.5;
+  }
+  .image-frame {
+    border-radius: 28px;
+    overflow: hidden;
+    border: 1px solid rgba(255,255,255,0.45);
+    background: rgba(255,255,255,0.52);
+  }
+  .image-frame img {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+  .login-card {
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    background: var(--surface-strong);
+    min-height: 100%;
+  }
+  .login-card h3,
+  .section-title {
+    margin: 0;
+    font-family: var(--font-display);
+    letter-spacing: -0.03em;
+  }
+  .login-card p,
+  .section-copy,
+  .settings-copy {
+    margin: 0;
+    color: var(--muted);
+    line-height: 1.52;
+  }
+  .field {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .field label {
+    font-size: 0.82rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .field input {
+    width: 100%;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-md);
+    padding: 13px 14px;
+    background: rgba(255,255,255,0.96);
+    color: var(--text);
+    outline: none;
+    transition: border-color .18s ease, box-shadow .18s ease;
+  }
+  .field input:focus {
+    border-color: color-mix(in srgb, var(--accent) 55%, white);
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent) 14%, transparent);
+  }
+  .helper,
+  .engine-status,
+  .setting-card,
+  .info-card,
+  .metric-banner {
+    border: 1px solid var(--line);
+    border-radius: var(--radius-lg);
+    background: rgba(255,255,255,0.72);
+  }
+  .helper,
+  .metric-banner { padding: 14px 16px; }
+  .helper {
+    font-size: 0.92rem;
+    color: var(--muted);
+  }
+  .helper strong { color: var(--text); }
+  .error-banner {
+    padding: 12px 14px;
+    border-radius: var(--radius-md);
+    background: rgba(255, 239, 239, 0.96);
+    color: #5f0b0b;
+    border: 1px solid rgba(143, 20, 20, 0.22);
+    font-size: 0.93rem;
+  }
+  .engine-grid,
+  .info-grid,
+  .theme-grid {
+    display: grid;
+    gap: 14px;
+  }
+  .engine-grid,
+  .info-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .engine-status,
+  .setting-card,
+  .info-card { padding: 18px; }
+  .engine-status {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+  }
+  .engine-status strong,
+  .setting-card strong,
+  .info-card strong {
+    display: block;
+    margin-bottom: 6px;
+    font-size: 1rem;
+  }
+  .engine-status span,
+  .setting-card span,
+  .info-card span,
+  .metric-banner span {
+    color: var(--muted);
+    line-height: 1.55;
+    font-size: 0.92rem;
+  }
+  .sell-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+  }
+  .sell-card {
+    border: 1px solid var(--line);
+    border-radius: var(--radius-md);
+    padding: 11px;
+    background: rgba(255,255,255,0.76);
+    transition: transform .16s ease, border-color .16s ease;
+  }
+  .sell-card:hover {
+    transform: translateY(-2px);
+    border-color: color-mix(in srgb, var(--accent) 35%, var(--line));
+  }
+  .sell-card strong {
+    display: block;
+    font-size: 0.94rem;
+    margin-bottom: 6px;
+  }
+  .sell-card span {
+    color: var(--muted);
+    font-size: 0.84rem;
+    line-height: 1.5;
+  }
+  .pilot-strip {
+    border: 1px solid var(--line);
+    border-radius: var(--radius-md);
+    background: rgba(255,255,255,0.82);
+    padding: 12px 13px;
+    color: var(--muted);
+    font-size: 0.86rem;
+    line-height: 1.55;
+  }
+  .pilot-strip strong {
+    color: var(--text);
+  }
+  .status-light {
+    width: 12px;
+    height: 12px;
+    border-radius: 999px;
+    background: #b9c3cf;
+    box-shadow: 0 0 0 7px rgba(185, 195, 207, 0.2);
+    flex-shrink: 0;
+  }
+  .status-light.live {
+    background: var(--good);
+    box-shadow: 0 0 0 7px color-mix(in srgb, var(--good) 20%, transparent);
+  }
+  .lower-grid {
+    margin-top: 20px;
+    display: grid;
+    grid-template-columns: minmax(0, 1.18fr) minmax(320px, 0.82fr);
+    gap: 24px;
+  }
+  .section { padding: 24px; }
+  .section-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 18px;
+  }
+  .section-badge {
+    padding: 8px 12px;
+    border-radius: 999px;
+    background: var(--badge-bg);
+    color: var(--badge-text);
+    font-size: 0.8rem;
+    font-weight: 700;
+  }
+  .activity-grid {
+    display: grid;
+    gap: 12px;
+  }
+  .activity-item {
+    padding: 14px;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-md);
+    background: rgba(255,255,255,0.7);
+    transition: transform .16s ease, border-color .16s ease;
+  }
+  .activity-item:hover {
+    transform: translateX(2px);
+    border-color: color-mix(in srgb, var(--accent) 36%, var(--line));
+  }
+  .activity-item strong {
+    display: block;
+    font-size: 0.98rem;
+    margin-bottom: 6px;
+  }
+  .activity-item span {
+    color: var(--muted);
+    font-size: 0.9rem;
+    line-height: 1.5;
+  }
+  .pulse-row {
+    margin-top: 10px;
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 8px;
+    align-items: end;
+    height: 42px;
+  }
+  .pulse-row i {
+    display: block;
+    width: 100%;
+    border-radius: 8px;
+    background: linear-gradient(180deg, var(--accent), var(--accent-2));
+    animation: rise 1.2s ease-in-out infinite;
+  }
+  .pulse-row i:nth-child(1) { height: 28%; animation-delay: .05s; }
+  .pulse-row i:nth-child(2) { height: 76%; animation-delay: .2s; }
+  .pulse-row i:nth-child(3) { height: 46%; animation-delay: .35s; }
+  .pulse-row i:nth-child(4) { height: 88%; animation-delay: .5s; }
+  .pulse-row i:nth-child(5) { height: 54%; animation-delay: .65s; }
+  @keyframes rise {
+    0%, 100% { transform: scaleY(0.65); opacity: 0.65; }
+    50% { transform: scaleY(1); opacity: 1; }
+  }
+  .settings-panel {
+    position: fixed;
+    top: 26px;
+    right: 26px;
+    width: min(360px, calc(100vw - 32px));
+    z-index: 30;
+    padding: 18px;
+  }
+  .settings-panel h4 {
+    margin: 0 0 8px;
+    font-family: var(--font-display);
+  }
+  .theme-grid {
+    grid-template-columns: 1fr;
+    margin-top: 16px;
+  }
+  .theme-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 14px;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--line);
+    background: rgba(255,255,255,0.78);
+    cursor: pointer;
+    text-align: left;
+  }
+  .theme-card.active {
+    border-color: color-mix(in srgb, var(--accent) 45%, white);
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent) 10%, transparent);
+  }
+  .swatches {
+    display: flex;
+    gap: 8px;
+  }
+  .swatches span {
+    width: 18px;
+    height: 18px;
+    border-radius: 999px;
+    border: 1px solid rgba(0,0,0,0.08);
+  }
+  .footer {
+    margin-top: 24px;
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    color: var(--muted);
+    font-size: 0.9rem;
+    animation: fade-in .4s ease;
+  }
+  @keyframes fade-up {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes fade-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+  @media (max-width: 1080px) {
+    .hero,
+    .lower-grid,
+    .engine-grid,
+    .info-grid,
+    .stat-grid { grid-template-columns: 1fr; }
+    .sell-grid { grid-template-columns: 1fr; }
+    .settings-panel {
+      top: auto;
+      bottom: 18px;
+      right: 16px;
+      left: 16px;
+      width: auto;
+    }
+  }
+  @media (max-width: 1220px) {
+    .hero {
+      grid-template-columns: 1fr;
+    }
+    .login-card {
+      min-height: 0;
+    }
+    .nav {
+      flex-direction: column;
+    }
+    .nav-actions {
+      justify-content: flex-start;
+      align-self: stretch;
+    }
+  }
+  @media (max-width: 760px) {
+    .shell {
+      width: min(100%, calc(100% - 24px));
+      padding-top: 16px;
+    }
+    .footer,
+    .nav-actions {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+    .hero-copy {
+      padding: 22px;
+      gap: 14px;
+    }
+    .hero-copy h2 {
+      font-size: clamp(1.95rem, 8vw, 3.1rem);
+      max-width: 11ch;
+    }
+    .login-card {
+      padding: 20px;
+    }
+  }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const { useEffect, useMemo, useState } = React;
+
+const THEMES = {
+  atelier: {
+    name: 'Atelier Sand',
+    bg: '#f3ede6',
+    bgAlt: '#e6edf7',
+    surface: 'rgba(255,255,255,0.72)',
+    surfaceStrong: 'rgba(255,255,255,0.9)',
+    surfaceSoft: 'rgba(255,255,255,0.56)',
+    text: '#122538',
+    muted: '#556679',
+    line: 'rgba(18,37,56,0.12)',
+    accent: '#0f6cbd',
+    accent2: '#f08a24',
+    accent3: '#18324d',
+    good: '#14845f',
+    glow: 'rgba(15,108,189,0.18)',
+  },
+  aurora: {
+    name: 'Aurora Mint',
+    bg: '#eaf5f0',
+    bgAlt: '#edf3ff',
+    surface: 'rgba(255,255,255,0.75)',
+    surfaceStrong: 'rgba(255,255,255,0.92)',
+    surfaceSoft: 'rgba(255,255,255,0.64)',
+    text: '#103040',
+    muted: '#4c6a73',
+    line: 'rgba(16,48,64,0.12)',
+    accent: '#0c8c7a',
+    accent2: '#7266ff',
+    accent3: '#163f54',
+    good: '#1d996c',
+    glow: 'rgba(12,140,122,0.18)',
+    badgeBg: 'rgba(12,140,122,0.12)',
+    badgeText: '#0a6b5d',
+  },
+  graphite: {
+    name: 'Graphite Night',
+    bg: '#0d1520',
+    bgAlt: '#1d2634',
+    surface: 'rgba(18,28,40,0.82)',
+    surfaceStrong: 'rgba(24,35,49,0.94)',
+    surfaceSoft: 'rgba(30,43,58,0.82)',
+    text: '#f2f6fc',
+    muted: '#bfd0e3',
+    line: 'rgba(242,246,252,0.18)',
+    accent: '#6ab4ff',
+    accent2: '#ffc466',
+    accent3: '#d9e6f6',
+    good: '#4fd9ab',
+    glow: 'rgba(106,180,255,0.24)',
+    badgeBg: 'rgba(255,196,102,0.2)',
+    badgeText: '#ffd48f',
+  },
+};
+
+function applyTheme(themeKey) {
+  const theme = THEMES[themeKey] || THEMES.atelier;
+  const root = document.documentElement;
+  root.style.setProperty('--bg', theme.bg);
+  root.style.setProperty('--bg-alt', theme.bgAlt);
+  root.style.setProperty('--surface', theme.surface);
+  root.style.setProperty('--surface-strong', theme.surfaceStrong);
+  root.style.setProperty('--surface-soft', theme.surfaceSoft);
+  root.style.setProperty('--text', theme.text);
+  root.style.setProperty('--muted', theme.muted);
+  root.style.setProperty('--line', theme.line);
+  root.style.setProperty('--accent', theme.accent);
+  root.style.setProperty('--accent-2', theme.accent2);
+  root.style.setProperty('--accent-3', theme.accent3);
+  root.style.setProperty('--good', theme.good);
+  root.style.setProperty('--glow', theme.glow);
+  root.style.setProperty('--badge-bg', theme.badgeBg || 'rgba(240, 138, 36, 0.12)');
+  root.style.setProperty('--badge-text', theme.badgeText || '#b36216');
+}
+
+function SettingsPanel({ open, theme, onThemeChange, onClose }) {
+  if (!open) return null;
+  return (
+    <aside className="panel settings-panel">
+      <div style={{display:'flex', alignItems:'center', justifyContent:'space-between', gap:'12px'}}>
+        <div>
+          <h4>Theme settings</h4>
+          <p className="settings-copy">Switch the landing page theme without changing workspace behavior.</p>
+        </div>
+        <button className="ghost-btn" type="button" onClick={onClose}>Close</button>
+      </div>
+      <div className="theme-grid">
+        {Object.entries(THEMES).map(([key, item]) => (
+          <button
+            key={key}
+            type="button"
+            className={`theme-card ${theme === key ? 'active' : ''}`}
+            onClick={() => onThemeChange(key)}
+          >
+            <div>
+              <strong style={{marginBottom:'4px'}}>{item.name}</strong>
+              <span>{key === 'atelier' ? 'Warm executive palette' : key === 'graphite' ? 'Dark operations palette' : 'Light modern palette'}</span>
+            </div>
+            <div className="swatches">
+              <span style={{background:item.accent}}></span>
+              <span style={{background:item.accent2}}></span>
+              <span style={{background:item.bg}}></span>
+            </div>
+          </button>
+        ))}
+      </div>
+    </aside>
+  );
+}
+
+function EngineCard({ title, detail, live }) {
+  return (
+    <article className="engine-status">
+      <div>
+        <strong>{title}</strong>
+        <span>{detail}</span>
+      </div>
+      <div className={`status-light ${live ? 'live' : ''}`}></div>
+    </article>
+  );
+}
+
+function App() {
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  const [theme, setTheme] = useState(() => localStorage.getItem('relaybi.theme') || 'atelier');
+  const [form, setForm] = useState({ username: '', password: '' });
+  const [engines, setEngines] = useState({ tableau: false, crystal: false, crystal_sdk: false, crystal_sdk_mode: '' });
+  const [error, setError] = useState('');
+  const [busy, setBusy] = useState(false);
+
+  // Debug: This is the LOGIN PAGE (Landing.html)
+  console.log('=== LANDING.HTML (LOGIN PAGE) LOADED ===');
+
+  useEffect(() => {
+    applyTheme(theme);
+    localStorage.setItem('relaybi.theme', theme);
+  }, [theme]);
+
+  useEffect(() => {
+    fetch('/engines')
+      .then((response) => response.json())
+      .then((data) => setEngines(data))
+      .catch(() => {});
+
+    // Don't auto-redirect on page load - let user explicitly login
+    // (if they try to access /app without login, the auth guard there will send them back)
+  }, []);
+
+  const crystalState = useMemo(() => {
+    if (!engines.crystal) return 'Not loaded';
+    if (engines.crystal_sdk) return `Loaded with ${engines.crystal_sdk_mode || 'sdk'} mode`;
+    return 'Loaded without SDK';
+  }, [engines]);
+
+  async function handleLogin(event) {
+    event.preventDefault();
+    setBusy(true);
+    setError('');
+    try {
+      const response = await fetch('/api/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          username: form.username.trim(),
+          password: form.password,
+          theme,
+        }),
+      });
+      const data = await response.json();
+      if (!response.ok || !data.ok) {
+        setError(data.error || 'Login failed');
+        return;
+      }
+      // Set client-side session flag so index.html auth guard allows through
+      sessionStorage.setItem('relaybi.session', '1');
+      window.location.href = '/app';
+    } catch (err) {
+      setError('Login request failed. Check that the local server is running.');
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <>
+      <SettingsPanel
+        open={settingsOpen}
+        theme={theme}
+        onThemeChange={setTheme}
+        onClose={() => setSettingsOpen(false)}
+      />
+      <main className="shell motion-enabled">
+        <header className="nav">
+          <div className="brand">
+            <img src="/logo.svg" alt="ReportBridge logo" />
+            <div>
+              <h1>ReportBridge</h1>
+              <p>Tableau, Crystal Reports, and legacy report flows into a single Power BI migration surface, with additional connectors on the roadmap.</p>
+            </div>
+          </div>
+          <div className="nav-actions">
+            <div className="chip">Tableau to Power BI</div>
+            <div className="chip">Crystal to Power BI</div>
+            <div className="chip">Upcoming: Cognos, Qlik, QuickSight</div>
+            <button className="settings-toggle" type="button" onClick={() => setSettingsOpen((value) => !value)}>
+              Theme settings
+            </button>
+          </div>
+        </header>
+
+        <section className="hero">
+          <div className="panel hero-copy">
+            <div className="eyebrow">Enterprise migration platform</div>
+            <h2>Unify fragmented reporting estates into one Power BI operating model.</h2>
+            <p>
+              ReportBridge provides a unified enterprise surface for Tableau and Crystal migration into Power BI outputs.
+              Start from workbook logic, legacy report structures, and seeded definitions, then transition into the
+              existing authenticated workspace. Upcoming roadmap includes Cognos to Power BI, QlikView and Qlik Sense to
+              Power BI, and Amazon QuickSight to Power BI.
+            </p>
+            <div className="cta-row">
+              <a className="primary-btn" href="#login">Open login</a>
+              <a className="secondary-btn" href="#migration-canvas">Migration canvas</a>
+              <a className="secondary-btn" href="#delivery-governance">Delivery governance</a>
+            </div>
+            <div className="stat-grid">
+              <div className="stat-card">
+                <strong>2 engines</strong>
+                <span>Unified orchestration for Tableau and Crystal conversion paths.</span>
+              </div>
+              <div className="stat-card">
+                <strong>Themeable</strong>
+                <span>Operators can change the landing page visual system from the settings panel.</span>
+              </div>
+              <div className="stat-card">
+                <strong>Secure access</strong>
+                <span>Authentication is enforced through centralized server-side controls before users can enter the migration workspace.</span>
+              </div>
+            </div>
+            <div className="image-frame">
+              <img src="/images/migration-workflow.svg" alt="Migration workflow from Tableau and Crystal reports into Power BI" />
+            </div>
+          </div>
+
+          <aside className="panel login-card" id="login">
+            <h3>Workspace login</h3>
+            <p>
+              Sign in with your authorized enterprise credentials. After successful authentication, users are routed to
+              the secure migration workspace to manage conversion operations, monitoring, and governance workflows.
+            </p>
+            {error ? <div className="error-banner">{error}</div> : null}
+            <form onSubmit={handleLogin} style={{display:'flex', flexDirection:'column', gap:'14px'}}>
+              <div className="field">
+                <label htmlFor="username">Username</label>
+                <input
+                  id="username"
+                  type="text"
+                  autoComplete="username"
+                  placeholder="admin"
+                  value={form.username}
+                  onChange={(event) => setForm((current) => ({ ...current, username: event.target.value }))}
+                />
+              </div>
+              <div className="field">
+                <label htmlFor="password">Password</label>
+                <input
+                  id="password"
+                  type="password"
+                  autoComplete="current-password"
+                  placeholder="Enter password"
+                  value={form.password}
+                  onChange={(event) => setForm((current) => ({ ...current, password: event.target.value }))}
+                />
+              </div>
+              <button className="primary-btn" type="submit" disabled={busy}>
+                {busy ? 'Signing in...' : 'Enter migration workspace'}
+              </button>
+            </form>
+            <div className="helper">
+              <strong>Configured theme:</strong> {THEMES[theme].name}. Change it any time from the settings button in the top bar.
+            </div>
+            <div className="engine-grid">
+              <EngineCard title="Tableau engine" detail={engines.tableau ? 'Loaded and ready for workbook migration' : 'Unavailable'} live={Boolean(engines.tableau)} />
+              <EngineCard title="Crystal engine" detail={crystalState} live={Boolean(engines.crystal)} />
+            </div>
+            <div className="metric-banner">
+              <strong style={{display:'block', marginBottom:'6px'}}>Migration visuals enabled</strong>
+              <span>Custom visual assets are loaded to represent Tableau conversion, Crystal transformation, and Power BI output state.</span>
+            </div>
+            <div className="sell-grid">
+              <article className="sell-card">
+                <strong>Faster onboarding</strong>
+                <span>Unified login, engine checks, and guided migration actions reduce operator training time.</span>
+              </article>
+              <article className="sell-card">
+                <strong>Lower migration risk</strong>
+                <span>Side-by-side governance cues and status visibility support reliable report handoffs.</span>
+              </article>
+              <article className="sell-card">
+                <strong>Enterprise fit</strong>
+                <span>Supports Tableau and Crystal programs today, with Cognos, QlikView, Qlik Sense, and QuickSight migrations planned.</span>
+              </article>
+            </div>
+            <div className="pilot-strip">
+              <strong>Commercial deployment note:</strong> This product is structured for enterprise rollout with role-based entry, controlled migration execution, governance-ready workflows, and an expanding connector roadmap to Power BI.
+            </div>
+          </aside>
+        </section>
+
+        <section className="lower-grid">
+          <div className="panel section" id="migration-canvas">
+            <div className="section-head">
+              <div>
+                <h3 className="section-title">Migration canvas</h3>
+                <p className="section-copy">A visual summary of how the tool handles workbook logic, report layouts, and migrated BI surfaces.</p>
+              </div>
+              <div className="section-badge">Product overview</div>
+            </div>
+            <div className="image-frame" style={{marginBottom:'18px'}}>
+              <img src="/images/migration-canvas.svg" alt="Dashboard preview for migrated Power BI outputs" />
+            </div>
+            <div className="info-grid">
+              <article className="info-card">
+                <strong>Tableau intake</strong>
+                <span>TWB and TWBX files can be profiled, mapped, and converted into Power BI templates from the same workspace.</span>
+              </article>
+              <article className="info-card">
+                <strong>Crystal orchestration</strong>
+                <span>Crystal parsing, documentation, seeding, and conversion are exposed through the same unified HTTP surface.</span>
+              </article>
+              <article className="info-card">
+                <strong>Upcoming connectors</strong>
+                <span>Roadmap includes Cognos to Power BI, QlikView and Qlik Sense to Power BI, and Amazon QuickSight to Power BI.</span>
+              </article>
+              <article className="info-card">
+                <strong>Theme control</strong>
+                <span>The landing page has a dedicated settings layer so each operator can adapt the visual theme without editing code.</span>
+              </article>
+              <article className="info-card">
+                <strong>Auth handoff</strong>
+                <span>Login is validated server-side and then passed into a cookie-gated transition to the existing application at /app.</span>
+              </article>
+            </div>
+          </div>
+
+          <div className="panel section" id="delivery-governance">
+            <div className="section-head">
+              <div>
+                <h3 className="section-title">Delivery governance</h3>
+                <p className="section-copy">Operational checkpoints for conversion quality, release readiness, and stakeholder confidence.</p>
+              </div>
+              <div className="section-badge">Enterprise controls</div>
+            </div>
+            <div className="activity-grid">
+              <article className="activity-item">
+                <strong>Schema fidelity monitoring</strong>
+                <span>Track seed-mapped fields, type compatibility, and unresolved source columns before publication.</span>
+                <div className="pulse-row"><i></i><i></i><i></i><i></i><i></i></div>
+              </article>
+              <article className="activity-item">
+                <strong>Migration throughput</strong>
+                <span>Visual pulse indicators mirror active conversion jobs to keep operators aligned during high-volume runs.</span>
+                <div className="pulse-row"><i></i><i></i><i></i><i></i><i></i></div>
+              </article>
+              <article className="activity-item">
+                <strong>Publish readiness gate</strong>
+                <span>Validate report assets, metadata, and output completeness before handoff into downstream governance workflows.</span>
+                <div className="pulse-row"><i></i><i></i><i></i><i></i><i></i></div>
+              </article>
+            </div>
+          </div>
+
+        </section>
+
+        <footer className="footer">
+          <div>Copyright © Yash Technologies</div>
+        </footer>
+      </main>
+    </>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+</body>
+</html> 

@@ -1,0 +1,1587 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ReportBridge Migration Suite - Workspace</title>
+<link rel="icon" href="/logo.svg" type="image/svg+xml">
+<script>
+// Auth check removed - Landing.html handles login, users reach /app after authentication
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+<script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+<script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+<script src="https://unpkg.com/@babel/standalone@7.22.5/babel.min.js"></script>
+<style>
+  :root {
+    --bg: #f3ede6;
+    --bg-alt: #e6edf7;
+    --surface: rgba(255,255,255,0.78);
+    --surface-strong: rgba(255,255,255,0.9);
+    --surface-soft: rgba(255,255,255,0.6);
+    --text: #122538;
+    --muted: #556679;
+    --line: rgba(18,37,56,0.12);
+    --accent: #0f6cbd;
+    --accent-2: #f08a24;
+    --accent-3: #18324d;
+    --good: #14845f;
+    --warn: #a25f18;
+    --danger: #b93b35;
+    --glow: rgba(15,108,189,0.2);
+    --shadow: 0 24px 70px rgba(18,37,56,0.18);
+    --font-body: "Source Sans 3", sans-serif;
+    --font-display: "Playfair Display", serif;
+    --text-title: clamp(1.45rem, 2vw, 2rem);
+    --text-panel: 0.92rem;
+    --text-body: 0.98rem;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; min-height: 100%; }
+  body {
+    font-family: var(--font-body);
+    color: var(--text);
+    background:
+      radial-gradient(circle at top left, color-mix(in srgb, var(--accent) 15%, transparent), transparent 35%),
+      radial-gradient(circle at right 20%, color-mix(in srgb, var(--accent-2) 16%, transparent), transparent 28%),
+      linear-gradient(140deg, var(--bg), var(--bg-alt));
+  }
+  .shell {
+    width: min(1360px, calc(100% - 26px));
+    margin: 0 auto;
+    padding: 16px 0 26px;
+    animation: fade-up .45s ease;
+  }
+  .topbar {
+    border: 1px solid rgba(255,255,255,0.45);
+    background: var(--surface);
+    backdrop-filter: blur(18px);
+    box-shadow: var(--shadow);
+    border-radius: 22px;
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 16px;
+    animation: fade-up .42s ease;
+  }
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .brand img {
+    width: 130px;
+    height: 65px;
+    object-fit: contain;
+    border-radius: 0;
+    padding: 0;
+    background: transparent;
+    box-shadow: none;
+    margin-right: -8px;
+  }
+  .brand h1 {
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: var(--text-title);
+    letter-spacing: -0.02em;
+  }
+  .brand p {
+    margin: 2px 0 0;
+    color: var(--muted);
+    font-size: var(--text-body);
+  }
+  .top-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .chip, .btn, input, select {
+    border-radius: 999px;
+    border: 1px solid var(--line);
+    background: var(--surface-strong);
+    color: var(--text);
+    padding: 8px 12px;
+    font: inherit;
+  }
+  .chip { font-size: 0.88rem; }
+  .status-chip {
+    font-weight: 700;
+  }
+  .status-chip.not-started {
+    color: var(--muted);
+  }
+  .status-chip.processing {
+    color: var(--accent);
+    border-color: color-mix(in srgb, var(--accent) 32%, var(--line));
+    background: color-mix(in srgb, var(--accent) 10%, white);
+  }
+  .status-chip.completed {
+    color: var(--good);
+    border-color: color-mix(in srgb, var(--good) 32%, var(--line));
+    background: color-mix(in srgb, var(--good) 10%, white);
+  }
+  .status-chip.error {
+    color: var(--danger);
+    border-color: color-mix(in srgb, var(--danger) 32%, var(--line));
+    background: color-mix(in srgb, var(--danger) 10%, white);
+  }
+  .btn {
+    cursor: pointer;
+    font-weight: 700;
+    transition: transform .15s ease;
+  }
+  .btn:hover { transform: translateY(-1px); }
+  .btn.primary {
+    color: #fff;
+    border: none;
+    background: linear-gradient(135deg, color-mix(in srgb, var(--accent) 88%, black), color-mix(in srgb, var(--accent) 62%, var(--accent-3)));
+  }
+  .btn.warn {
+    background: color-mix(in srgb, var(--accent-2) 18%, white);
+    border-color: color-mix(in srgb, var(--accent-2) 40%, var(--line));
+  }
+  .btn.danger {
+    background: color-mix(in srgb, var(--danger) 10%, white);
+    border-color: color-mix(in srgb, var(--danger) 30%, var(--line));
+    color: var(--danger);
+  }
+  .btn.help {
+    background: color-mix(in srgb, var(--accent) 10%, white);
+    border-color: color-mix(in srgb, var(--accent) 34%, var(--line));
+    color: color-mix(in srgb, var(--accent) 72%, #0a2440);
+  }
+  .theme-select {
+    border-radius: 12px;
+    border: 1px solid var(--line);
+    background: var(--surface-strong);
+    color: var(--text);
+    padding: 8px 12px;
+    font: inherit;
+    font-weight: 600;
+    font-size: 0.88rem;
+    cursor: pointer;
+    transition: all 0.18s ease;
+  }
+  .theme-select:hover {
+    border-color: color-mix(in srgb, var(--accent) 50%, var(--line));
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 12%, transparent);
+  }
+  .theme-select:focus {
+    outline: none;
+    border-color: color-mix(in srgb, var(--accent) 70%, var(--line));
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 18%, transparent);
+  }
+  .workspace {
+    display: grid;
+    grid-template-columns: 1.1fr 1fr 0.9fr;
+    gap: 14px;
+    min-height: calc(100vh - 145px);
+  }
+  .panel {
+    border: 1px solid rgba(255,255,255,0.45);
+    background: var(--surface);
+    backdrop-filter: blur(18px);
+    box-shadow: var(--shadow);
+    border-radius: 20px;
+    padding: 14px;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    animation: fade-up .5s ease;
+    transition: transform .2s ease, box-shadow .2s ease;
+  }
+  .panel:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 28px 80px rgba(18,37,56,0.2);
+  }
+  .panel h2 {
+    margin: 0 0 12px;
+    font-size: var(--text-panel);
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    color: var(--muted);
+  }
+  .panel-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+  .panel-head h2 { margin: 0; }
+  .panel-tools {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+  .mini-btn {
+    border: 1px solid var(--line);
+    background: var(--surface-soft);
+    color: var(--muted);
+    border-radius: 999px;
+    padding: 6px 10px;
+    font-size: .8rem;
+    font-weight: 700;
+    cursor: pointer;
+  }
+  .mini-btn.active {
+    background: color-mix(in srgb, var(--accent) 14%, white);
+    color: var(--accent-3);
+    border-color: color-mix(in srgb, var(--accent) 34%, var(--line));
+  }
+  .fields {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+  .field { display: flex; flex-direction: column; gap: 5px; }
+  .field label { font-size: .83rem; color: var(--muted); font-weight: 700; text-transform: uppercase; letter-spacing: .05em; }
+  .field input, .field select {
+    border-radius: 12px;
+    padding: 9px 11px;
+    width: 100%;
+    border: 1px solid var(--line);
+    background: var(--surface-strong);
+    transition: border-color .18s ease, box-shadow .18s ease;
+  }
+  .field input:focus, .field select:focus {
+    outline: none;
+    border-color: color-mix(in srgb, var(--accent) 55%, var(--line));
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 16%, transparent);
+  }
+  .path-field {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+  .path-field input {
+    flex: 1;
+    min-width: 0;
+  }
+  .picker-actions {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+  .picker-btn {
+    border-radius: 10px;
+    padding: 7px 9px;
+    font-size: .82rem;
+    border: 1px solid var(--line);
+    background: var(--surface-soft);
+    color: var(--muted);
+    cursor: pointer;
+  }
+  .picker-btn:hover {
+    color: var(--text);
+    border-color: color-mix(in srgb, var(--accent) 38%, var(--line));
+  }
+  .sp-full { grid-column: 1 / -1; }
+  .modes { display: flex; gap: 8px; flex-wrap: wrap; }
+  .tog {
+    border-radius: 12px;
+    border: 1px solid var(--line);
+    background: var(--surface-soft);
+    padding: 8px 10px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .action-row { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
+  .meta-strip {
+    margin-top: 10px;
+    padding: 9px 11px;
+    border-radius: 12px;
+    border: 1px solid var(--line);
+    background: var(--surface-soft);
+    color: var(--muted);
+    font-size: .9rem;
+  }
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0,1fr));
+    gap: 8px;
+    margin-bottom: 10px;
+  }
+  .stat {
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 10px;
+    background: var(--surface-soft);
+    min-width: 0;
+  }
+  .stat strong { font-size: 1.3rem; display: block; font-family: var(--font-display); }
+  .stat span {
+    color: var(--muted);
+    font-size: .77rem;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+    display: block;
+    overflow-wrap: anywhere;
+  }
+  .list {
+    overflow: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+    min-height: 0;
+    padding-right: 3px;
+  }
+  .job {
+    border: 1px solid var(--line);
+    border-left: 4px solid var(--accent);
+    border-radius: 12px;
+    padding: 9px;
+    background: var(--surface-strong);
+    animation: fade-up .28s ease;
+    transition: transform .16s ease, border-color .16s ease;
+  }
+  .job:hover {
+    transform: translateX(2px);
+  }
+  .job.done { border-left-color: var(--good); }
+  .job.error { border-left-color: var(--danger); }
+  .job .file { font-weight: 700; font-size: .95rem; }
+  .job .msg { color: var(--muted); font-size: .86rem; margin-top: 3px; }
+  .job-progress {
+    margin-top: 8px;
+    height: 7px;
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--line) 70%, white);
+    overflow: hidden;
+  }
+  .job-progress span {
+    display: block;
+    height: 100%;
+    border-radius: inherit;
+    background: linear-gradient(90deg, var(--accent), var(--accent-2));
+    transition: width .25s ease;
+  }
+  .job.done .job-progress span {
+    background: linear-gradient(90deg, var(--good), color-mix(in srgb, var(--good) 60%, white));
+  }
+  .job.error .job-progress span {
+    background: linear-gradient(90deg, var(--danger), color-mix(in srgb, var(--danger) 60%, white));
+  }
+  .history-item {
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 9px;
+    background: var(--surface-strong);
+  }
+  .history-folder {
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    background: var(--surface-soft);
+    padding: 9px;
+  }
+  .history-folder-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 7px;
+    color: var(--muted);
+    font-size: .84rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+    cursor: pointer;
+  }
+  .history-folder-meta {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .history-caret {
+    width: 20px;
+    text-align: center;
+    color: var(--accent);
+    font-weight: 700;
+  }
+  .history-folder-body {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+  }
+  .history-item .file {
+    font-weight: 700;
+    font-size: .94rem;
+  }
+  .history-item .msg,
+  .history-item .meta {
+    color: var(--muted);
+    font-size: .84rem;
+    margin-top: 4px;
+    line-height: 1.45;
+  }
+  .log-head { display: flex; gap: 8px; margin-bottom: 8px; }
+  .log-head input { border-radius: 12px; width: 100%; }
+  .log {
+    overflow: auto;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding-right: 3px;
+  }
+  .log-card {
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    background: color-mix(in srgb, var(--surface-strong) 76%, white);
+    overflow: hidden;
+  }
+  .log-card-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 10px 12px;
+    background: color-mix(in srgb, var(--surface-soft) 78%, white);
+    cursor: pointer;
+  }
+  .log-card-title {
+    font-weight: 700;
+    font-size: .92rem;
+  }
+  .log-card-meta {
+    color: var(--muted);
+    font-size: .8rem;
+  }
+  .log-card-progress {
+    width: 94px;
+    height: 7px;
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--line) 70%, white);
+    overflow: hidden;
+    flex-shrink: 0;
+  }
+  .log-card-progress span {
+    display: block;
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), var(--accent-2));
+  }
+  .log-card.done .log-card-progress span {
+    background: linear-gradient(90deg, var(--good), color-mix(in srgb, var(--good) 60%, white));
+  }
+  .log-card.error .log-card-progress span {
+    background: linear-gradient(90deg, var(--danger), color-mix(in srgb, var(--danger) 60%, white));
+  }
+  .log-lines {
+    padding: 8px;
+    font-family: Consolas, monospace;
+    font-size: 12px;
+    line-height: 1.45;
+  }
+  .line {
+    display: grid;
+    grid-template-columns: 58px 52px 1fr;
+    gap: 10px;
+    padding: 2px 0;
+    border-bottom: 1px dashed color-mix(in srgb, var(--line) 75%, transparent);
+    animation: fade-in .22s ease;
+  }
+  .line:hover {
+    background: color-mix(in srgb, var(--surface-strong) 55%, white);
+  }
+  .line:last-child { border-bottom: none; }
+  .lv-info { color: var(--accent); font-weight: 700; }
+  .lv-warn { color: var(--warn); font-weight: 700; }
+  .lv-error { color: var(--danger); font-weight: 700; }
+  .footer {
+    margin-top: 10px;
+    text-align: center;
+    color: var(--muted);
+    font-size: .86rem;
+  }
+  .kit-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(7, 17, 28, 0.46);
+    backdrop-filter: blur(6px);
+    z-index: 40;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 18px;
+  }
+  .kit-modal {
+    width: min(980px, 100%);
+    max-height: calc(100vh - 40px);
+    overflow: auto;
+    border-radius: 18px;
+    border: 1px solid var(--line);
+    background: var(--surface-strong);
+    box-shadow: 0 34px 90px rgba(8, 21, 35, 0.28);
+  }
+  .kit-head {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--line);
+    background: color-mix(in srgb, var(--surface-strong) 92%, white);
+  }
+  .kit-head h3 {
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: 1.1rem;
+    letter-spacing: -0.02em;
+  }
+  .kit-body {
+    padding: 14px;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+  }
+  .kit-card {
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    background: var(--surface-soft);
+    padding: 11px 12px;
+  }
+  .kit-card h4 {
+    margin: 0 0 8px;
+    font-size: .96rem;
+    letter-spacing: .01em;
+  }
+  .kit-item {
+    margin-bottom: 7px;
+    color: var(--muted);
+    font-size: .9rem;
+    line-height: 1.45;
+  }
+  .kit-item strong {
+    color: var(--text);
+  }
+  .kit-tip {
+    margin: 0 14px 14px;
+    border: 1px solid var(--line);
+    background: color-mix(in srgb, var(--accent) 10%, white);
+    color: color-mix(in srgb, var(--accent) 78%, #112941);
+    border-radius: 12px;
+    padding: 10px 12px;
+    font-size: .9rem;
+  }
+  @keyframes fade-up {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes fade-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+  @media (max-width: 1180px) {
+    .workspace { grid-template-columns: 1fr; min-height: auto; }
+    .panel { min-height: 360px; }
+    .fields { grid-template-columns: 1fr; }
+    .line { grid-template-columns: 56px 46px 1fr; }
+    .kit-body { grid-template-columns: 1fr; }
+  }
+
+  /* Graphite-specific contrast tuning for low-visibility tabs/cards */
+  :root[data-theme='graphite'] .mini-btn,
+  :root[data-theme='graphite'] .picker-btn,
+  :root[data-theme='graphite'] .tog,
+  :root[data-theme='graphite'] .meta-strip,
+  :root[data-theme='graphite'] .stat,
+  :root[data-theme='graphite'] .job,
+  :root[data-theme='graphite'] .history-item,
+  :root[data-theme='graphite'] .log-card,
+  :root[data-theme='graphite'] .log-card-head {
+    background: rgba(10, 18, 28, 0.88);
+    border-color: rgba(225, 235, 248, 0.26);
+  }
+
+  :root[data-theme='graphite'] .mini-btn,
+  :root[data-theme='graphite'] .picker-btn,
+  :root[data-theme='graphite'] .tog,
+  :root[data-theme='graphite'] .meta-strip,
+  :root[data-theme='graphite'] .stat span,
+  :root[data-theme='graphite'] .job .msg,
+  :root[data-theme='graphite'] .history-item .msg,
+  :root[data-theme='graphite'] .history-item .meta,
+  :root[data-theme='graphite'] .log-card-meta {
+    color: #d7e4f3;
+  }
+
+  :root[data-theme='graphite'] .mini-btn.active {
+    background: #c7d7ea;
+    color: #10263d;
+    border-color: #d7e4f3;
+  }
+
+  :root[data-theme='graphite'] .btn.warn {
+    background: rgba(18, 30, 45, 0.96);
+    border-color: rgba(255, 216, 151, 0.42);
+    color: #ffe2ad;
+  }
+
+  :root[data-theme='graphite'] .btn.warn:hover {
+    background: rgba(24, 38, 56, 0.98);
+    border-color: rgba(255, 216, 151, 0.58);
+    color: #fff0d1;
+  }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const { useEffect, useMemo, useRef, useState } = React;
+const HISTORY_KEY = 'relaybi.jobHistory';
+
+const THEMES = {
+  atelier: {
+    name: 'Atelier Sand',
+    bg: '#f3ede6', bgAlt: '#e6edf7', surface: 'rgba(255,255,255,0.78)', surfaceStrong: 'rgba(255,255,255,0.9)', surfaceSoft: 'rgba(255,255,255,0.6)',
+    text: '#122538', muted: '#556679', line: 'rgba(18,37,56,0.12)', accent: '#0f6cbd', accent2: '#f08a24', accent3: '#18324d', good: '#14845f', warn: '#a25f18', danger: '#b93b35', glow: 'rgba(15,108,189,0.2)'
+  },
+  graphite: {
+    name: 'Graphite Night',
+    bg: '#0d1520', bgAlt: '#1d2634', surface: 'rgba(18,28,40,0.84)', surfaceStrong: 'rgba(24,35,49,0.95)', surfaceSoft: 'rgba(29,42,57,0.84)',
+    text: '#f2f6fc', muted: '#bfd0e3', line: 'rgba(242,246,252,0.18)', accent: '#6ab4ff', accent2: '#ffc466', accent3: '#d9e6f6', good: '#4fd9ab', warn: '#ffd48f', danger: '#ff9f94', glow: 'rgba(106,180,255,0.24)'
+  },
+  aurora: {
+    name: 'Aurora Mint',
+    bg: '#eaf5f0', bgAlt: '#edf3ff', surface: 'rgba(255,255,255,0.8)', surfaceStrong: 'rgba(255,255,255,0.92)', surfaceSoft: 'rgba(255,255,255,0.64)',
+    text: '#103040', muted: '#4c6a73', line: 'rgba(16,48,64,0.12)', accent: '#0c8c7a', accent2: '#7266ff', accent3: '#163f54', good: '#1d996c', warn: '#8f5f2c', danger: '#b44646', glow: 'rgba(12,140,122,0.18)'
+  }
+};
+
+function applyTheme(themeKey) {
+  const t = THEMES[themeKey] || THEMES.atelier;
+  const root = document.documentElement;
+  root.setAttribute('data-theme', themeKey);
+  root.style.setProperty('--bg', t.bg);
+  root.style.setProperty('--bg-alt', t.bgAlt);
+  root.style.setProperty('--surface', t.surface);
+  root.style.setProperty('--surface-strong', t.surfaceStrong);
+  root.style.setProperty('--surface-soft', t.surfaceSoft);
+  root.style.setProperty('--text', t.text);
+  root.style.setProperty('--muted', t.muted);
+  root.style.setProperty('--line', t.line);
+  root.style.setProperty('--accent', t.accent);
+  root.style.setProperty('--accent-2', t.accent2);
+  root.style.setProperty('--accent-3', t.accent3);
+  root.style.setProperty('--good', t.good);
+  root.style.setProperty('--warn', t.warn);
+  root.style.setProperty('--danger', t.danger);
+  root.style.setProperty('--glow', t.glow);
+}
+
+function App() {
+  // Debug: This is the APP PAGE (index.html)
+  console.log('=== INDEX.HTML (APP PAGE) LOADED ===');
+  
+  const [theme, setTheme] = useState(() => localStorage.getItem('relaybi.theme') || 'atelier');
+  const [engine, setEngine] = useState('tableau');
+  const [src, setSrc] = useState('./source');
+  const [tgt, setTgt] = useState('./target');
+  const [analyze, setAnalyze] = useState(true);
+  const [convert, setConvert] = useState(true);
+  const [embedSample, setEmbedSample] = useState(false);
+  const [singleFile, setSingleFile] = useState('');
+  const [crystalFormat, setCrystalFormat] = useState('');
+  const [seedPbit, setSeedPbit] = useState('');
+  const [pbixMethod, setPbixMethod] = useState('none');
+  const [pbiExe, setPbiExe] = useState('');
+  const [timeout, setTimeoutSec] = useState('90');
+  const [tenant, setTenant] = useState('');
+  const [clientId, setClientId] = useState('');
+  const [clientSecret, setClientSecret] = useState('');
+  const [workspaceId, setWorkspaceId] = useState('');
+  const [running, setRunning] = useState(false);
+  const [connected, setConnected] = useState(false);
+  const [logs, setLogs] = useState([]);
+  const [jobs, setJobs] = useState({});
+  const [jobHistory, setJobHistory] = useState(() => {
+    try {
+      return JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]');
+    } catch (_) {
+      return [];
+    }
+  });
+  const [showHistory, setShowHistory] = useState(false);
+  const [expandedHistoryFolders, setExpandedHistoryFolders] = useState({});
+  const [expandedLogs, setExpandedLogs] = useState({});
+  const [filter, setFilter] = useState('');
+  const [showTutorialKit, setShowTutorialKit] = useState(false);
+  const [serverNote, setServerNote] = useState('Workspace connected to migration APIs.');
+  const logRef = useRef(null);
+  const initialStateHandledRef = useRef(false);
+  const srcFileInputRef = useRef(null);
+  const tgtFileInputRef = useRef(null);
+  const srcDirInputRef = useRef(null);
+  const tgtDirInputRef = useRef(null);
+  const jobTimingsRef = useRef({});
+
+  function cleanText(value) {
+    return String(value || '')
+      .replace(/âœ“\s*/g, '')
+      .replace(/âœ—\s*/g, '')
+      .replace(/â†’/g, '->')
+      .replace(/â†³/g, '->')
+      .replace(/â€˜|â€™/g, "'")
+      .replace(/â€œ|â€�/g, '"')
+      .replace(/Â/g, '')
+      .replace(/\s+â+\s*/g, ' ')
+      .replace(/â+/g, '')
+      .replace(/[✓✗]/g, '')
+      .replace(/â€¦/g, '...')
+      .replace(/â€”|â€“/g, '-')
+      .trim();
+  }
+
+  function inferDirectoryName(file) {
+    const path = (file && file.webkitRelativePath) ? file.webkitRelativePath : '';
+    if (!path || path.indexOf('/') === -1) return file ? file.name : '';
+    return path.split('/')[0];
+  }
+
+  function isPathExplicit(value) {
+    const v = String(value || '').trim();
+    if (!v) return false;
+    if (v.includes('\\') || v.includes('/')) return true;
+    return /^[A-Za-z]:/.test(v);
+  }
+
+  function resolveSingleFilePath(fileValue, sourceValue) {
+    const filePath = String(fileValue || '').trim();
+    if (!filePath) return '';
+    if (isPathExplicit(filePath)) return filePath;
+    const sourcePath = String(sourceValue || '').trim();
+    if (!sourcePath) return filePath;
+    const normalized = sourcePath.replace(/[\\/]+$/, '');
+    return normalized ? (normalized + '/' + filePath) : filePath;
+  }
+
+  function sanitizeJobsMap(rawJobs) {
+    const input = rawJobs || {};
+    const output = {};
+    Object.keys(input).forEach((key) => {
+      const item = input[key] || {};
+      output[key] = { ...item, message: cleanText(item.message) };
+    });
+    return output;
+  }
+
+  function progressFromMessage(status, message) {
+    const text = cleanText(message).toLowerCase();
+    if (status === 'done') return 100;
+    if (status === 'error') return 100;
+    if (text.includes('writing') || text.includes('created') || text.includes('saved')) return 86;
+    if (text.includes('building')) return 72;
+    if (text.includes('parsed') || text.includes('extract')) return 56;
+    if (text.includes('parsing') || text.includes('analyzing')) return 34;
+    if (text.includes('watching') || text.includes('starting')) return 16;
+    return 20;
+  }
+
+  function summarizeLogStatus(lines) {
+    const hasError = lines.some((item) => item.level === 'error');
+    if (hasError) return 'error';
+    const last = lines[lines.length - 1] || {};
+    const lastMessage = cleanText(last.message).toLowerCase();
+    if (lastMessage.includes('stopped') || lastMessage.includes('completed') || lastMessage.includes('done')) return 'done';
+    if (lastMessage.includes('created') || lastMessage.includes('saved') || lastMessage.includes('written')) return 'done';
+    return 'running';
+  }
+
+  function normalizeLogFile(file) {
+    const clean = cleanText(file);
+    return clean && clean !== '-' ? clean : 'Platform/System';
+  }
+
+  function archiveJobs(rawJobs, origin) {
+    const sanitized = sanitizeJobsMap(rawJobs);
+    const entries = Object.entries(sanitized);
+    if (!entries.length) return;
+    const archivedAt = new Date().toISOString();
+    setJobHistory((prev) => {
+      const existing = Array.isArray(prev) ? prev : [];
+      const nextItems = entries.map(([name, item]) => ({
+        id: [name, item.finished || item.started || '', item.message || '', origin, archivedAt].join('|'),
+        name,
+        status: item.status || 'done',
+        message: cleanText(item.message),
+        started: item.started || '',
+        finished: item.finished || '',
+        archivedAt,
+        origin,
+      }));
+      const merged = [...nextItems, ...existing];
+      const seen = new Set();
+      return merged.filter((item) => {
+        if (seen.has(item.id)) return false;
+        seen.add(item.id);
+        return true;
+      }).slice(0, 200);
+    });
+  }
+
+  useEffect(() => {
+    localStorage.setItem(HISTORY_KEY, JSON.stringify(jobHistory));
+  }, [jobHistory]);
+
+  async function pickFolder(setter, inputRef, label) {
+    if (window.showDirectoryPicker) {
+      try {
+        const handle = await window.showDirectoryPicker();
+        setter(handle.name || 'selected-folder');
+        setServerNote(label + ' folder selected. Update to absolute server path if needed.');
+        return;
+      } catch (err) {
+        if (err && err.name === 'AbortError') return;
+      }
+    }
+    if (inputRef.current) inputRef.current.click();
+  }
+
+  async function pickFile(setter, inputRef, label) {
+    if (window.showOpenFilePicker) {
+      try {
+        const handles = await window.showOpenFilePicker({ multiple: false });
+        if (handles && handles[0]) {
+          setter(handles[0].name || 'selected-file');
+          setServerNote(label + ' file selected. Update to absolute server path if needed.');
+          return;
+        }
+      } catch (err) {
+        if (err && err.name === 'AbortError') return;
+      }
+    }
+    if (inputRef.current) inputRef.current.click();
+  }
+
+  function onFileInputChange(event, setter, label) {
+    const file = event.target.files && event.target.files[0];
+    if (!file) return;
+    setter(file.name);
+    setServerNote(label + ' file selected. Update to absolute server path if needed.');
+    event.target.value = '';
+  }
+
+  function onDirectoryInputChange(event, setter, label) {
+    const file = event.target.files && event.target.files[0];
+    if (!file) return;
+    setter(inferDirectoryName(file));
+    setServerNote(label + ' folder selected by browser picker. If conversion cannot find it, paste the full local path.');
+    event.target.value = '';
+  }
+
+  useEffect(() => {
+    applyTheme(theme);
+    localStorage.setItem('relaybi.theme', theme);
+  }, [theme]);
+
+  const currentMode = useMemo(() => {
+    if (analyze && convert) return engine === 'tableau' ? 'analyze_migrate' : 'both';
+    if (analyze && !convert) return engine === 'tableau' ? 'analyze' : 'document';
+    if (!analyze && convert) return engine === 'tableau' ? 'migrate' : 'convert';
+    return engine === 'tableau' ? 'analyze_migrate' : 'both';
+  }, [engine, analyze, convert]);
+
+  useEffect(() => {
+    if (!analyze && !convert) {
+      setAnalyze(true);
+      setConvert(true);
+    }
+  }, [analyze, convert]);
+
+  useEffect(() => {
+    if (engine === 'tableau') {
+      if (src === './input') setSrc('./source');
+      if (tgt === './output') setTgt('./target');
+    } else if (engine === 'crystal') {
+      if (src === './source') setSrc('./input');
+      if (tgt === './target') setTgt('./output');
+    }
+  }, [engine]);
+
+  useEffect(() => {
+    const es = new EventSource('/events');
+    es.onopen = () => setConnected(true);
+    es.onerror = () => setConnected(false);
+    es.addEventListener('state', (e) => {
+      try {
+        const s = JSON.parse(e.data);
+        const sanitizedJobs = sanitizeJobsMap(s.jobs);
+        const hasActiveJobs = Object.values(sanitizedJobs).some((item) => (item.status || '') === 'running');
+
+        if (!initialStateHandledRef.current) {
+          initialStateHandledRef.current = true;
+          if (Object.keys(sanitizedJobs).length && !hasActiveJobs) {
+            archiveJobs(sanitizedJobs, 'carryover');
+            setJobs({});
+            setRunning(false);
+            setServerNote('Previous migration results were moved to history. Start a new run when ready.');
+            if (s.running) {
+              post('/stop', {}).catch(() => ({}));
+            }
+            post('/clear', {}).catch(() => ({}));
+          } else {
+            if (typeof s.running === 'boolean') setRunning(s.running);
+            if (s.jobs) setJobs(sanitizedJobs);
+          }
+        } else {
+          if (typeof s.running === 'boolean') setRunning(s.running);
+          if (s.jobs) setJobs(sanitizedJobs);
+        }
+        if (s.source) setSrc(s.source);
+        if (s.target) setTgt(s.target);
+      } catch (_) {}
+    });
+    es.addEventListener('job_update', (e) => {
+      try {
+        const d = JSON.parse(e.data);
+        const jobKey = d.filename;
+        
+        // Track job start time on first status update
+        if (!jobTimingsRef.current[jobKey] && d.status === 'running') {
+          jobTimingsRef.current[jobKey] = { start: Date.now() };
+        }
+        
+        // Calculate duration when job completes
+        let duration = undefined;
+        if ((d.status === 'done' || d.status === 'error') && jobTimingsRef.current[jobKey]) {
+          const elapsed = Date.now() - jobTimingsRef.current[jobKey].start;
+          duration = Math.round(elapsed / 1000); // Convert to seconds
+        }
+        
+        setJobs((prev) => ({
+          ...prev,
+          [jobKey]: {
+            ...(prev[jobKey] || {}),
+            status: d.status,
+            message: cleanText(d.message),
+            ts: d.ts,
+            duration: duration
+          }
+        }));
+      } catch (_) {}
+    });
+    es.addEventListener('status', (e) => {
+      try {
+        const d = JSON.parse(e.data);
+        if (typeof d.running === 'boolean') setRunning(d.running);
+      } catch (_) {}
+    });
+    es.addEventListener('log', (e) => {
+      try {
+        const d = JSON.parse(e.data);
+        // Calculate duration if this is a completion log and we have timing data
+        let duration = undefined;
+        if (d.file && (d.message || '').toLowerCase().includes('done')) {
+          const fileKey = normalizeLogFile(d.file);
+          if (jobTimingsRef.current[fileKey]) {
+            const elapsed = Date.now() - jobTimingsRef.current[fileKey].start;
+            duration = Math.round(elapsed / 1000);
+          }
+        }
+        setLogs((prev) => [...prev, { ts: d.ts, level: d.level, file: d.file, message: cleanText(d.message), duration }].slice(-1500));
+      } catch (_) {}
+    });
+    return () => es.close();
+  }, []);
+
+  useEffect(() => {
+    fetch('/engines').then((r) => r.json()).then((d) => {
+      if (d.crystal && !d.crystal_sdk) {
+        setServerNote('Crystal SDK not detected. Configure CRYSTAL_ASSEMBLY_PATH before Crystal conversion.');
+      }
+    }).catch(() => {
+      setServerNote('Engine discovery unavailable. Ensure server is running.');
+    });
+  }, []);
+
+  useEffect(() => {
+    if (logRef.current) {
+      logRef.current.scrollTop = logRef.current.scrollHeight;
+    }
+  }, [logs]);
+
+  useEffect(() => {
+    setExpandedLogs((prev) => {
+      const next = { ...prev };
+      filteredLogs.forEach((line) => {
+        const key = normalizeLogFile(line.file);
+        if (next[key] === undefined && line.level === 'error') {
+          next[key] = true;
+        }
+      });
+      return next;
+    });
+  }, [logs]);
+
+  async function post(path, body) {
+    try {
+      const r = await fetch(path, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body || {}) });
+      const j = await r.json().catch(() => ({ ok: false, error: 'Invalid response' }));
+      return r.ok ? j : { ok: false, error: j.error || ('Server ' + r.status) };
+    } catch (e) {
+      return { ok: false, error: e.message };
+    }
+  }
+
+  function basePbix() {
+    if (pbixMethod === 'none') return {};
+    if (pbixMethod === 'desktop') {
+      return { pbix_method: pbixMethod, pbi_exe: pbiExe.trim(), timeout: parseInt(timeout, 10) || 90 };
+    }
+    return {
+      pbix_method: pbixMethod,
+      tenant_id: tenant.trim(),
+      client_id: clientId.trim(),
+      client_secret: clientSecret.trim(),
+      workspace_id: workspaceId.trim()
+    };
+  }
+
+  async function startProcess() {
+    if (!src.trim() || !tgt.trim()) return;
+    if (Object.keys(jobs).length) {
+      archiveJobs(jobs, 'manual-start');
+      setJobs({});
+    }
+    if (engine === 'tableau') {
+      const payload = {
+        source: src.trim(),
+        target: tgt.trim(),
+        mode: currentMode,
+        embed_sample_data: embedSample,
+        ...basePbix()
+      };
+      const r = await post('/start', payload);
+      if (!r.ok) setLogs((p) => [...p, { ts: now(), level: 'error', file: '[Workspace]', message: r.error || 'Tableau start failed' }]);
+    } else {
+      const payload = {
+        input_folder: src.trim(),
+        output_folder: tgt.trim(),
+        crystal_mode: currentMode,
+        output_format: crystalFormat,
+        seed_pbit: seedPbit.trim(),
+        ...basePbix()
+      };
+      const r = await post('/crystal/start', payload);
+      if (!r.ok) setLogs((p) => [...p, { ts: now(), level: 'error', file: '[Workspace]', message: r.error || 'Crystal start failed' }]);
+    }
+  }
+
+  async function stopProcess() {
+    if (engine !== 'tableau') return;
+    await post('/stop', {});
+  }
+
+  async function runSingle() {
+    if (engine !== 'tableau' || !singleFile.trim()) return;
+    const resolvedFile = resolveSingleFilePath(singleFile, src);
+    const payload = {
+      file: resolvedFile,
+      target: tgt.trim(),
+      mode: currentMode,
+      embed_sample_data: embedSample,
+      ...basePbix()
+    };
+    const r = await post('/convert_one', payload);
+    if (!r.ok) setLogs((p) => [...p, { ts: now(), level: 'error', file: '[Workspace]', message: r.error || 'Single conversion failed' }]);
+  }
+
+  async function clearJobs() {
+    if (Object.keys(jobs).length) {
+      archiveJobs(jobs, 'manual-clear');
+    }
+    await post('/clear', {});
+    setJobs({});
+  }
+
+  async function logout() {
+    if (Object.keys(jobs).length) {
+      archiveJobs(jobs, 'logout');
+    }
+    await post('/stop', {}).catch(() => ({}));
+    await post('/clear', {}).catch(() => ({}));
+    await post('/api/logout', {});
+    sessionStorage.removeItem('relaybi.session');
+    window.location.href = '/';
+  }
+
+  const filteredLogs = logs.filter((l) => {
+    if (!filter.trim()) return true;
+    const q = filter.toLowerCase();
+    return (l.message || '').toLowerCase().includes(q) || (l.file || '').toLowerCase().includes(q);
+  });
+
+  const jobArray = Object.entries(jobs);
+  const statTotal = jobArray.length;
+  const statRunning = jobArray.filter(([, v]) => (v.status || '') === 'running').length;
+  const statDone = jobArray.filter(([, v]) => (v.status || '') === 'done').length;
+  const statError = jobArray.filter(([, v]) => (v.status || '') === 'error').length;
+  const isWorkspaceCompleted = statRunning === 0 && statError === 0 && statDone > 0;
+
+  const groupedLogs = useMemo(() => {
+    const map = new Map();
+    filteredLogs.forEach((line) => {
+      const key = normalizeLogFile(line.file);
+      if (!map.has(key)) map.set(key, []);
+      map.get(key).push(line);
+    });
+
+    // Collect all non-Platform/System messages to detect duplicates
+    const otherFileMessages = new Set();
+    map.forEach((lines, file) => {
+      if (file !== 'Platform/System') {
+        lines.forEach((l) => {
+          otherFileMessages.add((l.message || '').trim());
+        });
+      }
+    });
+
+    // Filter Platform/System to exclude duplicates
+    if (map.has('Platform/System')) {
+      const sysLines = map.get('Platform/System');
+      const deduped = sysLines.filter((line) => {
+        const msg = (line.message || '').trim();
+        // Keep if it's unique or it's a status-like message
+        const isStatusMsg = msg.toLowerCase().includes('completed') || 
+                           msg.toLowerCase().includes('stopped') || 
+                           msg.toLowerCase().includes('session') ||
+                           msg.toLowerCase().includes('connected');
+        return !otherFileMessages.has(msg) || isStatusMsg;
+      });
+      map.set('Platform/System', deduped);
+    }
+
+    const grouped = Array.from(map.entries()).map(([file, lines]) => {
+      let status = summarizeLogStatus(lines);
+      if (file === 'Platform/System' && isWorkspaceCompleted) {
+        status = 'done';
+      }
+      const last = lines[lines.length - 1] || {};
+      const progress = progressFromMessage(status === 'done' ? 'done' : status === 'error' ? 'error' : 'running', last.message || '');
+      return { file, lines, status, lastTs: last.ts || '', progress };
+    }).sort((a, b) => {
+      const aSys = a.file === 'Platform/System' ? 0 : 1;
+      const bSys = b.file === 'Platform/System' ? 0 : 1;
+      if (aSys !== bSys) return aSys - bSys;
+      return a.lastTs < b.lastTs ? 1 : -1;
+    });
+    return grouped;
+  }, [filteredLogs, isWorkspaceCompleted]);
+
+  const historyFolders = useMemo(() => {
+    const buckets = new Map();
+    jobHistory.forEach((item) => {
+      const dt = item.archivedAt ? new Date(item.archivedAt) : null;
+      const valid = dt && !Number.isNaN(dt.getTime());
+      const label = valid
+        ? dt.toLocaleString([], {
+            year: 'numeric',
+            month: 'short',
+            day: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit',
+          })
+        : 'Unknown Run';
+      const key = valid ? dt.toISOString().slice(0, 16) : 'unknown';
+      if (!buckets.has(key)) buckets.set(key, { key, label, items: [] });
+      buckets.get(key).items.push(item);
+    });
+    return Array.from(buckets.values()).sort((a, b) => (a.key < b.key ? 1 : -1));
+  }, [jobHistory]);
+
+  useEffect(() => {
+    setExpandedHistoryFolders((prev) => {
+      const next = { ...prev };
+      historyFolders.forEach((folder, idx) => {
+        if (next[folder.key] === undefined) {
+          next[folder.key] = idx < 2;
+        }
+      });
+      return next;
+    });
+  }, [historyFolders]);
+
+  function setAllHistoryFolders(expanded) {
+    const next = {};
+    historyFolders.forEach((folder) => {
+      next[folder.key] = expanded;
+    });
+    setExpandedHistoryFolders(next);
+  }
+
+  const workspaceStatus = statRunning > 0
+    ? { label: 'Processing', cls: 'processing' }
+    : statError > 0
+      ? { label: 'Error', cls: 'error' }
+      : statDone > 0
+        ? { label: 'Completed', cls: 'completed' }
+        : { label: 'Not Started', cls: 'not-started' };
+
+  const tutorialKit = [
+    {
+      title: 'Top Bar',
+      items: [
+        { key: 'Connected', text: 'Shows SSE connection status with backend events.' },
+        { key: 'Status Chip', text: 'Overall workspace state from all jobs: Not Started, Processing, Completed, or Error.' },
+        { key: 'Theme Selector', text: 'Switches visual skin without changing migration behavior.' },
+        { key: 'Logout', text: 'Stops/clears active session state and returns to login page.' },
+      ],
+    },
+    {
+      title: 'Migration Command Center',
+      items: [
+        { key: 'Engine', text: 'Select Tableau or Crystal conversion pipeline.' },
+        { key: 'Mode', text: 'Auto-derived mode based on Analyze/Convert toggles.' },
+        { key: 'Input/Output', text: 'Source and destination paths; use Folder/File helpers for quick selection.' },
+        { key: 'PBIX Method', text: 'Choose Skip, Desktop Automation, or API conversion path after PBIT generation.' },
+      ],
+    },
+    {
+      title: 'Action Buttons',
+      items: [
+        { key: 'Start Process', text: 'Begins batch migration using current settings.' },
+        { key: 'Stop', text: 'Stops Tableau worker when running.' },
+        { key: 'Clear Jobs', text: 'Moves current entries to history and clears active list.' },
+        { key: 'Run One', text: 'Executes conversion for a single workbook path.' },
+      ],
+    },
+    {
+      title: 'Operations Log',
+      items: [
+        { key: 'Filter', text: 'Search logs by message text or source file.' },
+        { key: 'Grouped Cards', text: 'Each card represents one file/system log stream with live status.' },
+        { key: 'Expand/Collapse', text: 'Click a card header to inspect detailed line-by-line events.' },
+        { key: 'Status Label', text: 'ACTIVE, STABLE, or ERROR based on latest stream state.' },
+      ],
+    },
+    {
+      title: 'Migration Jobs',
+      items: [
+        { key: 'Current Tab', text: 'Shows jobs from the current run session.' },
+        { key: 'History Tab', text: 'Shows archived jobs from previous actions/sessions.' },
+        { key: 'Stats Cards', text: 'Totals for Total, Running, Done, and Error jobs.' },
+        { key: 'Progress Bar', text: 'Visual estimate of each job lifecycle stage.' },
+      ],
+    },
+    {
+      title: 'How To Use',
+      items: [
+        { key: 'Step 1', text: 'Pick engine, folders, and mode toggles.' },
+        { key: 'Step 2', text: 'Set PBIX method if you need PBIX output artifacts.' },
+        { key: 'Step 3', text: 'Run Start Process and watch Operations Log + Jobs panel.' },
+        { key: 'Step 4', text: 'Use History tab for post-run audit trail.' },
+      ],
+    },
+  ];
+
+  return (
+    <div className="shell">
+      <header className="topbar">
+        <div className="brand">
+          <img
+            src="logo.svg"
+            alt="YASH Technologies"
+            style={{width:120,height:52,objectFit:'contain',borderRadius:10,padding:'4px 8px',background:'rgba(255,255,255,0.95)',boxShadow:'0 4px 14px rgba(15,108,189,0.18)'}}
+            onError={(e) => {
+              e.target.style.display = 'none';
+              e.target.nextSibling.style.display = 'block';
+            }}
+          />
+          {/* SVG fallback shown if logo.svg fails to load */}
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 230 68" width="140" height="52"
+            style={{display:'none',background:'rgba(255,255,255,0.95)',borderRadius:10,padding:'4px 8px',boxShadow:'0 4px 14px rgba(15,108,189,0.18)',flexShrink:0}}>
+            <defs>
+              <linearGradient id="rg" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" style={{stopColor:'#E8201A'}}/>
+                <stop offset="100%" style={{stopColor:'#C0392B'}}/>
+              </linearGradient>
+              <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" style={{stopColor:'#1A5DAD'}}/>
+                <stop offset="100%" style={{stopColor:'#1976D2'}}/>
+              </linearGradient>
+            </defs>
+            <text x="2" y="40" fontFamily="'Arial Black',Arial,sans-serif" fontSize="42" fontWeight="900" fill="url(#rg)" letterSpacing="-1">YASH</text>
+            <circle cx="152" cy="7" r="5.5" fill="none" stroke="#E8201A" strokeWidth="1.2"/>
+            <text x="152" y="11" fontFamily="Arial,sans-serif" fontSize="6.5" fontWeight="700" fill="#E8201A" textAnchor="middle">R</text>
+            <path d="M 158 4 Q 210 10 222 34 Q 210 58 158 64" stroke="url(#bg)" strokeWidth="7" fill="none" strokeLinecap="round"/>
+            <path d="M 158 14 Q 198 18 208 34 Q 198 50 158 54" stroke="url(#bg)" strokeWidth="3.5" fill="none" strokeLinecap="round" opacity="0.55"/>
+            <text x="3" y="54" fontFamily="Arial,sans-serif" fontSize="12" fontWeight="600" fill="#1A5DAD" letterSpacing="0.3">Technologies</text>
+          </svg>
+          <div>
+            <h1>ReportBridge</h1>
+            <p>Migration Suite</p>
+          </div>
+        </div>
+        <div className="top-actions">
+          <div className="chip">{connected ? 'Connected' : 'Disconnected'}</div>
+          <div className={'chip status-chip ' + workspaceStatus.cls}>{workspaceStatus.label}</div>
+          <div className="chip">User: admin</div>
+          <select value={theme} onChange={(e) => setTheme(e.target.value)} className="theme-select">
+            <option value="atelier">☀️ Classic (Light)</option>
+            <option value="graphite">🌙 Dark Mode</option>
+            <option value="aurora">✨ Modern (Mint)</option>
+          </select>
+          <button className="btn help" onClick={() => setShowTutorialKit(true)}>Tutorial Kit</button>
+          <button className="btn danger" onClick={logout}>Logout</button>
+        </div>
+      </header>
+
+      {showTutorialKit && (
+        <div className="kit-overlay" onClick={() => setShowTutorialKit(false)}>
+          <div className="kit-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="kit-head">
+              <h3>Workspace Tutorial Kit</h3>
+              <button className="btn" onClick={() => setShowTutorialKit(false)}>Close</button>
+            </div>
+            <div className="kit-body">
+              {tutorialKit.map((section) => (
+                <article className="kit-card" key={section.title}>
+                  <h4>{section.title}</h4>
+                  {section.items.map((item) => (
+                    <div className="kit-item" key={section.title + '-' + item.key}>
+                      <strong>{item.key}:</strong> {item.text}
+                    </div>
+                  ))}
+                </article>
+              ))}
+            </div>
+            <div className="kit-tip">
+              Tip: Keep this panel open on one screen while running your first conversion. It acts as a live knowledge kit for controls, tabs, and containers.
+            </div>
+          </div>
+        </div>
+      )}
+
+      <main className="workspace">
+        <section className="panel">
+          <h2>Migration Command Center</h2>
+          <div className="fields">
+            <div className="field">
+              <label>Engine</label>
+              <select value={engine} onChange={(e) => setEngine(e.target.value)}>
+                <option value="tableau">Tableau</option>
+                <option value="crystal">Crystal Reports</option>
+              </select>
+            </div>
+            <div className="field">
+              <label>Mode</label>
+              <input value={currentMode} readOnly />
+            </div>
+            <div className="field sp-full">
+              <label>Input Folder</label>
+              <div className="path-field">
+                <input value={src} onChange={(e) => setSrc(e.target.value)} placeholder="C:\\path\\to\\input-or-file" />
+                <div className="picker-actions">
+                  <button type="button" className="picker-btn" onClick={() => pickFolder(setSrc, srcDirInputRef, 'Input')}>Folder</button>
+                  <button type="button" className="picker-btn" onClick={() => pickFile(setSrc, srcFileInputRef, 'Input')}>File</button>
+                </div>
+              </div>
+            </div>
+            <div className="field sp-full">
+              <label>Output Folder</label>
+              <div className="path-field">
+                <input value={tgt} onChange={(e) => setTgt(e.target.value)} placeholder="C:\\path\\to\\output-or-file" />
+                <div className="picker-actions">
+                  <button type="button" className="picker-btn" onClick={() => pickFolder(setTgt, tgtDirInputRef, 'Output')}>Folder</button>
+                  <button type="button" className="picker-btn" onClick={() => pickFile(setTgt, tgtFileInputRef, 'Output')}>File</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="modes" style={{ marginTop: 10 }}>
+            <label className="tog"><input type="checkbox" checked={analyze} onChange={(e) => setAnalyze(e.target.checked)} /> Analyze</label>
+            <label className="tog"><input type="checkbox" checked={convert} onChange={(e) => setConvert(e.target.checked)} /> Convert</label>
+            {engine === 'tableau' && (
+              <label className="tog"><input type="checkbox" checked={embedSample} onChange={(e) => setEmbedSample(e.target.checked)} /> Embed sample data</label>
+            )}
+          </div>
+
+          <div className="fields" style={{ marginTop: 10 }}>
+            <div className="field">
+              <label>PBIX Method</label>
+              <select value={pbixMethod} onChange={(e) => setPbixMethod(e.target.value)}>
+                <option value="none">Skip PBIX</option>
+                <option value="desktop">Desktop Automation</option>
+                <option value="api">Power BI API</option>
+              </select>
+            </div>
+            {pbixMethod === 'desktop' && (
+              <>
+                <div className="field">
+                  <label>Desktop Path</label>
+                  <input value={pbiExe} onChange={(e) => setPbiExe(e.target.value)} placeholder="...\\PBIDesktop.exe" />
+                </div>
+                <div className="field">
+                  <label>Timeout Seconds</label>
+                  <input value={timeout} onChange={(e) => setTimeoutSec(e.target.value)} />
+                </div>
+              </>
+            )}
+            {pbixMethod === 'api' && (
+              <>
+                <div className="field"><label>Tenant ID</label><input value={tenant} onChange={(e) => setTenant(e.target.value)} /></div>
+                <div className="field"><label>Client ID</label><input value={clientId} onChange={(e) => setClientId(e.target.value)} /></div>
+                <div className="field"><label>Client Secret</label><input type="password" value={clientSecret} onChange={(e) => setClientSecret(e.target.value)} /></div>
+                <div className="field"><label>Workspace ID</label><input value={workspaceId} onChange={(e) => setWorkspaceId(e.target.value)} /></div>
+              </>
+            )}
+            {engine === 'crystal' && (
+              <>
+                <div className="field">
+                  <label>Crystal Output Format</label>
+                  <select value={crystalFormat} onChange={(e) => setCrystalFormat(e.target.value)}>
+                    <option value="">Auto-detect</option>
+                    <option value="pbit">Force .pbit</option>
+                    <option value="rdl">Force .rdl</option>
+                  </select>
+                </div>
+                <div className="field">
+                  <label>Seed .pbit (optional)</label>
+                  <input value={seedPbit} onChange={(e) => setSeedPbit(e.target.value)} />
+                </div>
+              </>
+            )}
+          </div>
+
+          <div className="action-row">
+            <button className="btn primary" onClick={startProcess} disabled={running}>Start Process</button>
+            <button className="btn danger" onClick={stopProcess} disabled={!running || engine !== 'tableau'}>Stop</button>
+            <button className="btn warn" onClick={clearJobs}>Clear Jobs</button>
+          </div>
+
+          {engine === 'tableau' && (
+            <div className="action-row">
+              <input value={singleFile} onChange={(e) => setSingleFile(e.target.value)} placeholder="Single .twb/.twbx path" style={{ flex: 1, borderRadius: 12 }} />
+              <button className="btn" onClick={runSingle}>Run One</button>
+            </div>
+          )}
+
+          <div className="meta-strip">{serverNote}</div>
+        </section>
+
+        <section className="panel">
+          <h2>Operations Log</h2>
+          <div className="log-head">
+            <input placeholder="Filter logs" value={filter} onChange={(e) => setFilter(e.target.value)} />
+            <button className="btn" onClick={() => setLogs([])}>Clear</button>
+          </div>
+          <div className="log" ref={logRef}>
+            {groupedLogs.length === 0 && <div className="log-card"><div className="log-lines">No log lines yet. Start a migration process.</div></div>}
+            {groupedLogs.map((group) => {
+              const expanded = expandedLogs[group.file] ?? false;
+              return (
+                <article className={'log-card ' + group.status} key={group.file}>
+                  <div className="log-card-head" onClick={() => setExpandedLogs((prev) => ({ ...prev, [group.file]: !expanded }))}>
+                    <div>
+                      <div className="log-card-title">{group.file === 'Platform/System' ? 'Platform/System Events' : group.file}</div>
+                      <div className="log-card-meta">{group.lines.length} events | Last update {group.lastTs || '--:--:--'}</div>
+                    </div>
+                    <div style={{display:'flex', alignItems:'center', gap:'10px'}}>
+                      <div className="log-card-progress"><span style={{ width: group.progress + '%' }}></span></div>
+                      <div className={'lv-' + (group.status === 'done' ? 'info' : group.status === 'error' ? 'error' : 'warn')}>
+                        {group.status === 'done' ? 'STABLE' : group.status === 'error' ? 'ERROR' : 'ACTIVE'}
+                      </div>
+                    </div>
+                  </div>
+                  {expanded && (
+                    <div className="log-lines">
+                      {group.lines.map((l, i) => (
+                        <div className="line" key={group.file + '-' + i}>
+                          <span>{l.ts || '--:--:--'}</span>
+                          <span className={'lv-' + (l.level || 'info')}>{(l.level || 'info').toUpperCase()}</span>
+                          <span>{l.message || ''}{l.duration ? ` [${l.duration}s]` : ''}</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </article>
+              );
+            })}
+          </div>
+        </section>
+
+        <section className="panel">
+          <div className="panel-head">
+            <h2>Migration Jobs</h2>
+            <div className="panel-tools">
+              <button className={'mini-btn ' + (!showHistory ? 'active' : '')} onClick={() => setShowHistory(false)}>Current</button>
+              <button className={'mini-btn ' + (showHistory ? 'active' : '')} onClick={() => setShowHistory(true)}>History</button>
+              {showHistory && (
+                <>
+                  <button className="mini-btn" onClick={() => setAllHistoryFolders(true)}>Expand all</button>
+                  <button className="mini-btn" onClick={() => setAllHistoryFolders(false)}>Collapse all</button>
+                </>
+              )}
+            </div>
+          </div>
+          <div className="stats">
+            <div className="stat"><strong>{statTotal}</strong><span>Total</span></div>
+            <div className="stat"><strong>{statRunning}</strong><span>Running</span></div>
+            <div className="stat"><strong>{statDone}</strong><span>Done</span></div>
+            <div className="stat"><strong>{statError}</strong><span>Error</span></div>
+          </div>
+          <div className="list">
+            {!showHistory && jobArray.length === 0 && <div className="job"><div className="file">No active jobs</div><div className="msg">Current session activity will appear here after start.</div></div>}
+            {!showHistory && jobArray.map(([name, j]) => (
+              <article className={'job ' + (j.status || 'running')} key={name}>
+                <div className="file" title={name}>{name}</div>
+                <div className="msg">{j.message || ''}</div>
+                <div className="msg">{j.ts || ''}{j.duration ? ` | ${j.duration}s` : ''}</div>
+                <div className="job-progress"><span style={{ width: progressFromMessage(j.status || 'running', j.message || '') + '%' }}></span></div>
+              </article>
+            ))}
+            {showHistory && jobHistory.length === 0 && <div className="history-item"><div className="file">No history yet</div><div className="msg">Completed or cleared migration runs will be archived here with timestamps.</div></div>}
+            {showHistory && historyFolders.map((folder) => (
+              <section className="history-folder" key={folder.key}>
+                <div className="history-folder-head" onClick={() => setExpandedHistoryFolders((prev) => ({ ...prev, [folder.key]: !prev[folder.key] }))}>
+                  <span>{folder.label}</span>
+                  <div className="history-folder-meta">
+                    <span>{folder.items.length} item{folder.items.length === 1 ? '' : 's'}</span>
+                    <span className="history-caret">{expandedHistoryFolders[folder.key] ? '▼' : '▶'}</span>
+                  </div>
+                </div>
+                {expandedHistoryFolders[folder.key] && (
+                  <div className="history-folder-body">
+                    {folder.items.map((item) => (
+                      <article className="history-item" key={item.id}>
+                        <div className="file" title={item.name}>{item.name}</div>
+                        <div className="msg">{item.message || ''}</div>
+                        <div className="meta">Status: {item.status || 'done'} | Finished: {item.finished || item.archivedAt || ''}</div>
+                      </article>
+                    ))}
+                  </div>
+                )}
+              </section>
+            ))}
+          </div>
+        </section>
+      </main>
+
+      <footer className="footer">Copyright © Yash Technologies</footer>
+
+      <input ref={srcFileInputRef} type="file" style={{ display: 'none' }} onChange={(e) => onFileInputChange(e, setSrc, 'Input')} />
+      <input ref={tgtFileInputRef} type="file" style={{ display: 'none' }} onChange={(e) => onFileInputChange(e, setTgt, 'Output')} />
+      <input ref={srcDirInputRef} type="file" webkitdirectory="" directory="" style={{ display: 'none' }} onChange={(e) => onDirectoryInputChange(e, setSrc, 'Input')} />
+      <input ref={tgtDirInputRef} type="file" webkitdirectory="" directory="" style={{ display: 'none' }} onChange={(e) => onDirectoryInputChange(e, setTgt, 'Output')} />
+    </div>
+  );
+}
+
+function now() {
+  return new Date().toTimeString().slice(0, 8);
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+</body>
+</html>

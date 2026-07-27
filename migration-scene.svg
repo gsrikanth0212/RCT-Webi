@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 760" role="img" aria-labelledby="title desc">
+  <title id="title">Report migration overview</title>
+  <desc id="desc">Visual showing Tableau and legacy reports moving into Power BI dashboards.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#f5efe6"/>
+      <stop offset="1" stop-color="#dce9f7"/>
+    </linearGradient>
+    <linearGradient id="flow" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#f08a24"/>
+      <stop offset="1" stop-color="#0f6cbd"/>
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="18" stdDeviation="18" flood-color="#12304a" flood-opacity="0.16"/>
+    </filter>
+  </defs>
+  <rect width="1200" height="760" rx="42" fill="url(#bg)"/>
+  <g filter="url(#shadow)">
+    <rect x="66" y="130" width="252" height="360" rx="26" fill="#ffffff"/>
+    <rect x="394" y="194" width="252" height="292" rx="26" fill="#fffaf2"/>
+    <rect x="808" y="106" width="318" height="430" rx="30" fill="#ffffff"/>
+  </g>
+  <text x="102" y="180" font-family="Arial, sans-serif" font-size="28" font-weight="700" fill="#15293c">Tableau</text>
+  <rect x="102" y="212" width="180" height="16" rx="8" fill="#ef5b2b" opacity="0.9"/>
+  <rect x="102" y="248" width="148" height="16" rx="8" fill="#f0b429" opacity="0.75"/>
+  <rect x="102" y="284" width="116" height="16" rx="8" fill="#2abf88" opacity="0.75"/>
+  <circle cx="138" cy="378" r="36" fill="#ef5b2b" opacity="0.88"/>
+  <rect x="192" y="346" width="42" height="92" rx="16" fill="#134b9c" opacity="0.9"/>
+  <rect x="248" y="316" width="42" height="122" rx="16" fill="#59b5ff" opacity="0.82"/>
+  <text x="428" y="240" font-family="Arial, sans-serif" font-size="28" font-weight="700" fill="#15293c">Crystal</text>
+  <rect x="428" y="274" width="192" height="14" rx="7" fill="#285c8f" opacity="0.9"/>
+  <rect x="428" y="308" width="154" height="14" rx="7" fill="#9bb3ca" opacity="0.78"/>
+  <rect x="428" y="342" width="112" height="14" rx="7" fill="#d1dae6"/>
+  <path d="M454 404h132l-22 44h-132z" fill="#f08a24" opacity="0.85"/>
+  <path d="M332 292c96 0 96 0 96 0" stroke="url(#flow)" stroke-width="14" stroke-linecap="round"/>
+  <path d="M646 320c106 0 106 0 106 0" stroke="url(#flow)" stroke-width="14" stroke-linecap="round"/>
+  <path d="M736 320l34-20v40z" fill="#0f6cbd"/>
+  <text x="850" y="160" font-family="Arial, sans-serif" font-size="30" font-weight="700" fill="#15293c">Power BI Workspace</text>
+  <rect x="852" y="204" width="230" height="18" rx="9" fill="#ffd84d"/>
+  <rect x="852" y="240" width="174" height="18" rx="9" fill="#f3a73f"/>
+  <rect x="852" y="280" width="74" height="168" rx="24" fill="#0f6cbd"/>
+  <rect x="948" y="234" width="74" height="214" rx="24" fill="#3b8ed8"/>
+  <rect x="1044" y="174" width="74" height="274" rx="24" fill="#f08a24"/>
+  <rect x="852" y="482" width="266" height="18" rx="9" fill="#dce4ec"/>
+  <text x="96" y="592" font-family="Arial, sans-serif" font-size="42" font-weight="700" fill="#132330">From workbook logic and legacy layouts</text>
+  <text x="96" y="640" font-family="Arial, sans-serif" font-size="42" font-weight="700" fill="#132330">to governed Power BI outputs.</text>
+</svg>
