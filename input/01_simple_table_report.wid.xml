@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Representative SAP BusinessObjects Web Intelligence document source (simplified schema) -->
+<WebIDocument name="Regional Sales Summary" cuid="AXk3nP2rTiZFqL9vY7cWq2A" lastRefresh="2026-07-20T08:15:00Z">
+
+  <DataProviders>
+    <DataProvider id="DP1" name="Sales Query" type="Universe" universe="eFashion Sales Universe" connection="BOE:EFashion_Prod">
+      <ResultObjects>
+        <Object id="OBJ_CUST" name="Customer" type="Dimension" qualification="Dimension" dataType="Character"/>
+        <Object id="OBJ_PROD" name="Product Line" type="Dimension" qualification="Dimension" dataType="Character"/>
+        <Object id="OBJ_STATE" name="State" type="Dimension" qualification="Dimension" dataType="Character"/>
+        <Object id="OBJ_QTY" name="Quantity Sold" type="Measure" qualification="Measure" dataType="Number" aggregation="Sum"/>
+        <Object id="OBJ_REV" name="Sales Revenue" type="Measure" qualification="Measure" dataType="Number" aggregation="Sum"/>
+      </ResultObjects>
+      <QueryFilters>
+        <Filter object="OBJ_STATE" operator="InList">
+          <Value>California</Value>
+          <Value>Texas</Value>
+          <Value>New York</Value>
+        </Filter>
+        <Filter object="Fiscal Year" operator="Equal">
+          <Value>2026</Value>
+        </Filter>
+      </QueryFilters>
+    </DataProvider>
+  </DataProviders>
+
+  <Variables>
+    <Variable id="VAR_AVGPRICE" name="Avg Unit Price" dataType="Number">
+      <Formula>=[Sales Revenue]/[Quantity Sold]</Formula>
+    </Variable>
+  </Variables>
+
+  <Reports>
+    <Report name="Sales Table" tabOrder="1">
+      <PageSetup orientation="Landscape" size="A4"/>
+      <Sections>
+        <Section id="SEC_ROOT" breakOn="none">
+          <Blocks>
+            <Block id="BLK1" type="Table" name="Customer Sales Table">
+              <Columns>
+                <Column object="OBJ_CUST" header="Customer"/>
+                <Column object="OBJ_STATE" header="State"/>
+                <Column object="OBJ_PROD" header="Product Line"/>
+                <Column object="OBJ_QTY" header="Qty Sold" format="#,##0"/>
+                <Column object="OBJ_REV" header="Revenue" format="$#,##0.00"/>
+                <Column object="VAR_AVGPRICE" header="Avg Unit Price" format="$#,##0.00"/>
+              </Columns>
+              <SortOrder>
+                <Sort object="OBJ_REV" direction="Descending"/>
+              </SortOrder>
+              <Footer>
+                <Aggregate column="OBJ_QTY" function="Sum"/>
+                <Aggregate column="OBJ_REV" function="Sum"/>
+              </Footer>
+            </Block>
+          </Blocks>
+        </Section>
+      </Sections>
+    </Report>
+  </Reports>
+
+</WebIDocument>

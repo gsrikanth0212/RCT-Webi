@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Representative SAP BusinessObjects Web Intelligence document source (simplified schema) -->
+<WebIDocument name="Sales vs Support Cost Analysis" cuid="AXk5vT9nZmQJtP3wC6fZu1D" lastRefresh="2026-07-24T09:45:00Z">
+
+  <DataProviders>
+
+    <!-- DP1: Sales universe -->
+    <DataProvider id="DP1" name="Sales Query" type="Universe" universe="Sales Performance Universe" connection="BOE:Sales_Prod">
+      <ResultObjects>
+        <Object id="OBJ_PROD" name="Product" type="Dimension" qualification="Dimension" dataType="Character"/>
+        <Object id="OBJ_QTR" name="Fiscal Quarter" type="Dimension" qualification="Dimension" dataType="Character"/>
+        <Object id="OBJ_REVENUE" name="Revenue" type="Measure" qualification="Measure" dataType="Number" aggregation="Sum"/>
+      </ResultObjects>
+      <QueryFilters>
+        <Filter object="Fiscal Year" operator="Equal">
+          <Value>2026</Value>
+        </Filter>
+      </QueryFilters>
+    </DataProvider>
+
+    <!-- DP2: Customer support universe -->
+    <DataProvider id="DP2" name="Support Cost Query" type="Universe" universe="Customer Support Universe" connection="BOE:Support_Prod">
+      <ResultObjects>
+        <Object id="OBJ_PROD2" name="Product" type="Dimension" qualification="Dimension" dataType="Character"/>
+        <Object id="OBJ_QTR2" name="Fiscal Quarter" type="Dimension" qualification="Dimension" dataType="Character"/>
+        <Object id="OBJ_TICKETS" name="Support Tickets" type="Measure" qualification="Measure" dataType="Number" aggregation="Sum"/>
+        <Object id="OBJ_SUPPCOST" name="Support Cost" type="Measure" qualification="Measure" dataType="Number" aggregation="Sum"/>
+      </ResultObjects>
+      <QueryFilters>
+        <Filter object="Fiscal Year" operator="Equal">
+          <Value>2026</Value>
+        </Filter>
+      </QueryFilters>
+    </DataProvider>
+
+    <!-- DP3: Free-hand SQL provider against a finance data mart, for margin context -->
+    <DataProvider id="DP3" name="Product COGS Query" type="FreeHandSQL" connection="BOE:Finance_DataMart">
+      <SQL><![CDATA[
+        SELECT product_name AS "Product", fiscal_quarter AS "Fiscal Quarter", cogs_amount AS "COGS"
+        FROM finance.product_cogs
+        WHERE fiscal_year = 2026
+      ]]></SQL>
+      <ResultObjects>
+        <Object id="OBJ_PROD3" name="Product" type="Dimension" dataType="Character"/>
+        <Object id="OBJ_QTR3" name="Fiscal Quarter" type="Dimension" dataType="Character"/>
+        <Object id="OBJ_COGS" name="COGS" type="Measure" dataType="Number" aggregation="Sum"/>
+      </ResultObjects>
+    </DataProvider>
+
+  </DataProviders>
+
+  <MergedDimensions>
+    <Merge name="Product">
+      <Source dataProvider="DP1" object="OBJ_PROD"/>
+      <Source dataProvider="DP2" object="OBJ_PROD2"/>
+      <Source dataProvider="DP3" object="OBJ_PROD3"/>
+    </Merge>
+    <Merge name="Fiscal Quarter">
+      <Source dataProvider="DP1" object="OBJ_QTR"/>
+      <Source dataProvider="DP2" object="OBJ_QTR2"/>
+      <Source dataProvider="DP3" object="OBJ_QTR3"/>
+    </Merge>
+  </MergedDimensions>
+
+  <Variables>
+    <Variable id="VAR_GROSSMARGIN" name="Gross Margin" dataType="Number">
+      <Formula>=[Revenue]-[COGS]</Formula>
+    </Variable>
+    <Variable id="VAR_NETMARGIN" name="Net Margin After Support" dataType="Number">
+      <Formula>=[Revenue]-[COGS]-[Support Cost]</Formula>
+    </Variable>
+    <Variable id="VAR_COSTPERTICKET" name="Support Cost per Ticket" dataType="Number">
+      <Formula>=[Support Cost]/[Support Tickets]</Formula>
+    </Variable>
+  </Variables>
+
+  <Reports>
+    <Report name="Consolidated Product Profitability" tabOrder="1">
+      <PageSetup orientation="Landscape" size="A4"/>
+      <Sections>
+        <Section id="SEC_ROOT" breakOn="none">
+          <Blocks>
+            <Block id="BLK_MAIN" type="Table" name="Cross-Universe Profitability Table">
+              <Columns>
+                <Column mergedDimension="Product" header="Product"/>
+                <Column mergedDimension="Fiscal Quarter" header="Quarter"/>
+                <Column object="DP1.OBJ_REVENUE" header="Revenue" format="$#,##0"/>
+                <Column object="DP3.OBJ_COGS" header="COGS" format="$#,##0"/>
+                <Column object="VAR_GROSSMARGIN" header="Gross Margin" format="$#,##0"/>
+                <Column object="DP2.OBJ_SUPPCOST" header="Support Cost" format="$#,##0"/>
+                <Column object="DP2.OBJ_TICKETS" header="Support Tickets" format="#,##0"/>
+                <Column object="VAR_COSTPERTICKET" header="Cost / Ticket" format="$#,##0.00"/>
+                <Column object="VAR_NETMARGIN" header="Net Margin" format="$#,##0"/>
+              </Columns>
+              <SortOrder>
+                <Sort mergedDimension="Fiscal Quarter" direction="Ascending"/>
+                <Sort object="VAR_NETMARGIN" direction="Descending"/>
+              </SortOrder>
+              <ConditionalFormatting>
+                <Rule appliesTo="VAR_NETMARGIN" condition="LessThan:0" style="color:#C00000;font-weight:bold"/>
+              </ConditionalFormatting>
+            </Block>
+
+            <Block id="BLK_CHART" type="Chart" chartType="ComboBarLine" name="Margin vs Support Cost by Quarter" position="x=0,y=260,w=630,h=250">
+              <Axis role="Category" mergedDimension="Fiscal Quarter"/>
+              <Axis role="Value" object="VAR_NETMARGIN" chartElement="Bar"/>
+              <Axis role="SecondaryValue" object="DP2.OBJ_SUPPCOST" chartElement="Line"/>
+              <Legend position="Bottom"/>
+            </Block>
+          </Blocks>
+        </Section>
+      </Sections>
+    </Report>
+  </Reports>
+
+</WebIDocument>

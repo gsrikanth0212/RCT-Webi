@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Representative SAP BusinessObjects Web Intelligence document source (simplified schema) -->
+<WebIDocument name="Executive Sales Dashboard" cuid="AXk1zR7wYkPHsN2xB4eYt8C" lastRefresh="2026-07-26T07:30:00Z">
+
+  <DataProviders>
+    <DataProvider id="DP1" name="Sales Trend Query" type="Universe" universe="Sales Performance Universe" connection="BOE:Sales_Prod">
+      <ResultObjects>
+        <Object id="OBJ_MONTH" name="Month" type="Dimension" qualification="Dimension" dataType="Date"/>
+        <Object id="OBJ_REGION" name="Region" type="Dimension" qualification="Dimension" dataType="Character"/>
+        <Object id="OBJ_PRODCAT" name="Product Category" type="Dimension" qualification="Dimension" dataType="Character"/>
+        <Object id="OBJ_REVENUE" name="Revenue" type="Measure" qualification="Measure" dataType="Number" aggregation="Sum"/>
+        <Object id="OBJ_MARGIN" name="Margin" type="Measure" qualification="Measure" dataType="Number" aggregation="Sum"/>
+        <Object id="OBJ_UNITS" name="Units Sold" type="Measure" qualification="Measure" dataType="Number" aggregation="Sum"/>
+      </ResultObjects>
+    </DataProvider>
+  </DataProviders>
+
+  <Variables>
+    <Variable id="VAR_MARGINPCT" name="Margin %" dataType="Number">
+      <Formula>=[Margin]/[Revenue]*100</Formula>
+    </Variable>
+    <Variable id="VAR_REVYOY" name="Revenue YoY Growth %" dataType="Number">
+      <Formula>=([Revenue]-[Revenue] ForEach([Month];RelativeDate(-12)))/[Revenue] ForEach([Month];RelativeDate(-12))*100</Formula>
+    </Variable>
+  </Variables>
+
+  <InputControls>
+    <InputControl id="IC_REGION" type="ComboBox" boundObject="OBJ_REGION" label="Select Region"/>
+    <InputControl id="IC_DATERANGE" type="DateRangeSlider" boundObject="OBJ_MONTH" label="Date Range"/>
+    <InputControl id="IC_PRODCAT" type="CheckboxList" boundObject="OBJ_PRODCAT" label="Product Category"/>
+  </InputControls>
+
+  <Reports>
+    <Report name="Dashboard" tabOrder="1">
+      <PageSetup orientation="Landscape" size="A3"/>
+
+      <Sections>
+        <Section id="SEC_ROOT" breakOn="none">
+          <Blocks>
+
+            <!-- KPI summary tiles -->
+            <Block id="BLK_KPI1" type="KPI" name="Total Revenue" position="x=0,y=0,w=200,h=100">
+              <Metric object="OBJ_REVENUE" function="Sum" format="$#,##0,,M"/>
+              <Comparison object="VAR_REVYOY" style="TrendArrow"/>
+            </Block>
+            <Block id="BLK_KPI2" type="KPI" name="Margin %" position="x=210,y=0,w=200,h=100">
+              <Metric object="VAR_MARGINPCT" function="Average" format="0.0%"/>
+            </Block>
+            <Block id="BLK_KPI3" type="KPI" name="Units Sold" position="x=420,y=0,w=200,h=100">
+              <Metric object="OBJ_UNITS" function="Sum" format="#,##0"/>
+            </Block>
+
+            <!-- Trend line chart -->
+            <Block id="BLK_LINE" type="Chart" chartType="Line" name="Revenue Trend by Month" position="x=0,y=110,w=630,h=250">
+              <Axis role="Category" object="OBJ_MONTH"/>
+              <Axis role="Value" object="OBJ_REVENUE"/>
+              <SeriesBy object="OBJ_REGION"/>
+              <Legend position="Bottom"/>
+            </Block>
+
+            <!-- Bar chart by category -->
+            <Block id="BLK_BAR" type="Chart" chartType="StackedBar" name="Revenue by Category and Region" position="x=0,y=370,w=310,h=250">
+              <Axis role="Category" object="OBJ_PRODCAT"/>
+              <Axis role="Value" object="OBJ_REVENUE"/>
+              <SeriesBy object="OBJ_REGION"/>
+              <Legend position="Right"/>
+            </Block>
+
+            <!-- Pie chart of region share -->
+            <Block id="BLK_PIE" type="Chart" chartType="Pie" name="Revenue Share by Region" position="x=320,y=370,w=310,h=250">
+              <Slice object="OBJ_REGION"/>
+              <Value object="OBJ_REVENUE"/>
+              <DataLabels show="Percentage"/>
+            </Block>
+
+            <!-- Cross-tab detail -->
+            <Block id="BLK_CROSSTAB" type="CrossTab" name="Region vs Category Matrix" position="x=0,y=630,w=630,h=220">
+              <RowAxis object="OBJ_REGION"/>
+              <ColumnAxis object="OBJ_PRODCAT"/>
+              <Body object="OBJ_REVENUE" function="Sum" format="$#,##0"/>
+              <ConditionalFormatting>
+                <Rule appliesTo="Body" condition="ColorScale" min="#F8696B" mid="#FFEB84" max="#63BE7B"/>
+              </ConditionalFormatting>
+            </Block>
+
+          </Blocks>
+        </Section>
+      </Sections>
+    </Report>
+  </Reports>
+
+</WebIDocument>

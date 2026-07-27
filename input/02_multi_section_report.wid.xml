@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Representative SAP BusinessObjects Web Intelligence document source (simplified schema) -->
+<WebIDocument name="Quarterly Regional Performance" cuid="AXk8mQ4uViYGrM1zA3dXr5B" lastRefresh="2026-07-25T06:00:00Z">
+
+  <DataProviders>
+    <DataProvider id="DP1" name="Regional Performance Query" type="Universe" universe="Sales Performance Universe" connection="BOE:Sales_Prod">
+      <ResultObjects>
+        <Object id="OBJ_REGION" name="Region" type="Dimension" qualification="Dimension" dataType="Character"/>
+        <Object id="OBJ_COUNTRY" name="Country" type="Dimension" qualification="Dimension" dataType="Character"/>
+        <Object id="OBJ_SALESREP" name="Sales Rep" type="Dimension" qualification="Dimension" dataType="Character"/>
+        <Object id="OBJ_QTR" name="Fiscal Quarter" type="Dimension" qualification="Dimension" dataType="Character"/>
+        <Object id="OBJ_TARGET" name="Sales Target" type="Measure" qualification="Measure" dataType="Number" aggregation="Sum"/>
+        <Object id="OBJ_ACTUAL" name="Actual Sales" type="Measure" qualification="Measure" dataType="Number" aggregation="Sum"/>
+      </ResultObjects>
+      <QueryFilters>
+        <Filter object="Fiscal Year" operator="Equal">
+          <Value>2026</Value>
+        </Filter>
+      </QueryFilters>
+    </DataProvider>
+  </DataProviders>
+
+  <Variables>
+    <Variable id="VAR_ATTAIN" name="Target Attainment %" dataType="Number">
+      <Formula>=[Actual Sales]/[Sales Target]*100</Formula>
+    </Variable>
+    <Variable id="VAR_FLAG" name="Performance Flag" dataType="Character">
+      <Formula>=If([VAR_ATTAIN]&gt;=100;"On Target";If([VAR_ATTAIN]&gt;=80;"Near Target";"Below Target"))</Formula>
+    </Variable>
+  </Variables>
+
+  <Reports>
+    <Report name="Regional Breakdown" tabOrder="1">
+      <PageSetup orientation="Landscape" size="A4"/>
+
+      <!-- Report header block, present on every page -->
+      <Sections>
+        <Section id="SEC_TITLE" breakOn="none">
+          <Blocks>
+            <Block id="BLK_TITLE" type="FreeCell" name="Report Title">
+              <Content>Quarterly Regional Performance — FY2026</Content>
+            </Block>
+          </Blocks>
+        </Section>
+
+        <!-- Level 1 break: Region -->
+        <Section id="SEC_REGION" breakOn="OBJ_REGION" newPagePerBreak="true">
+          <SectionHeader>
+            <Cell object="OBJ_REGION" label="Region: "/>
+          </SectionHeader>
+
+          <!-- Level 2 break nested: Country within Region -->
+          <SubSections>
+            <Section id="SEC_COUNTRY" breakOn="OBJ_COUNTRY" newPagePerBreak="false">
+              <SectionHeader>
+                <Cell object="OBJ_COUNTRY" label="Country: "/>
+              </SectionHeader>
+              <Blocks>
+                <Block id="BLK_DETAIL" type="Table" name="Rep Detail Table">
+                  <Columns>
+                    <Column object="OBJ_SALESREP" header="Sales Rep"/>
+                    <Column object="OBJ_QTR" header="Quarter"/>
+                    <Column object="OBJ_TARGET" header="Target" format="$#,##0"/>
+                    <Column object="OBJ_ACTUAL" header="Actual" format="$#,##0"/>
+                    <Column object="VAR_ATTAIN" header="Attainment %" format="0.0%"/>
+                    <Column object="VAR_FLAG" header="Status"/>
+                  </Columns>
+                  <ConditionalFormatting>
+                    <Rule appliesTo="VAR_FLAG" condition="Equal:Below Target" style="background-color:#F8CBAD"/>
+                    <Rule appliesTo="VAR_FLAG" condition="Equal:On Target" style="background-color:#C6E0B4"/>
+                  </ConditionalFormatting>
+                  <Footer>
+                    <Aggregate column="OBJ_TARGET" function="Sum"/>
+                    <Aggregate column="OBJ_ACTUAL" function="Sum"/>
+                  </Footer>
+                </Block>
+              </Blocks>
+              <SectionFooter>
+                <Cell object="VAR_ATTAIN" function="Average" label="Country Avg Attainment: "/>
+              </SectionFooter>
+            </Section>
+          </SubSections>
+
+          <SectionFooter>
+            <Cell object="OBJ_ACTUAL" function="Sum" label="Region Total Actual: "/>
+          </SectionFooter>
+        </Section>
+      </Sections>
+    </Report>
+  </Reports>
+
+</WebIDocument>
