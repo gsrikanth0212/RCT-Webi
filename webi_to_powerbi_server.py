@@ -1512,11 +1512,25 @@ _M_TYPE_MAP = {
 }
 
 _INVALID_NAME_CHARS = re.compile(r"[\[\]'\"\r\n\t]")
+_M_SIMPLE_IDENTIFIER = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*$")
 
 
 def _safe_pbi_name(name: str, fallback: str = "Field") -> str:
     cleaned = _INVALID_NAME_CHARS.sub(" ", name or "").strip()
     return cleaned or fallback
+
+
+def _m_quote_identifier(name: str) -> str:
+    """M language identifiers containing a space or any character outside
+    [A-Za-z0-9_] (or starting with a digit) MUST be quoted as #"Name" —
+    an unquoted `Product Line = text` inside a `type table [...]`
+    declaration is a syntax error that Power BI Desktop's Mashup/Power
+    Query engine rejects outright (surfaces as "This file is corrupted"
+    when opening the .pbit). Every WebI object name with a space — which
+    is the normal case — needs this."""
+    if _M_SIMPLE_IDENTIFIER.match(name):
+        return name
+    return '#"' + name.replace('"', '""') + '"'
 
 
 def _unique_name(base: str, seen: set) -> str:
@@ -1537,7 +1551,10 @@ def _empty_m_partition(table_name: str, columns: list) -> dict:
     """Empty, correctly-typed Power Query source — see module docstring
     "Scope note" for why this migration does not fabricate row data."""
     if columns:
-        type_decl = ", ".join(f"{c['name']} = {_M_TYPE_MAP.get(c['dataType'], 'text')}.Type" for c in columns)
+        type_decl = ", ".join(
+            f"{_m_quote_identifier(c['name'])} = {_M_TYPE_MAP.get(c['dataType'], 'text')}.Type"
+            for c in columns
+        )
         source = f"#table(type table [{type_decl}], {{}})"
     else:
         source = "#table(type table [_Placeholder = text.Type], {})"
