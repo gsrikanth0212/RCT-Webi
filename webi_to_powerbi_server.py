@@ -83,6 +83,16 @@ def _guid() -> str:
     return str(uuid.uuid4())
 
 
+def _hex_id(n_chars: int) -> str:
+    """Power BI's PBIR/legacy visual and page names are plain lowercase hex
+    strings (no hyphens) of a fixed length — e.g. a 20-char visual `name`
+    or the 24-char suffix on a `ReportSection<hex>` page name — never a
+    standard UUID4 string. Concatenating uuid4().hex (32 lowercase hex
+    chars, no hyphens) covers any n_chars up to 32; for longer IDs (e.g.
+    Filter<24hex> after a 6-char prefix) this still holds since 24 < 32."""
+    return (uuid.uuid4().hex * 2)[:n_chars]
+
+
 # ═══════════════════════════════════════════════════════════════════════════
 # SECTION 1 — WebI Intermediate Representation  (from webi_ir.py)
 # ═══════════════════════════════════════════════════════════════════════════
@@ -2222,7 +2232,7 @@ def _build_query_and_projections(wells: dict, role_aliases: dict):
 
             node_key = "Measure" if placement.is_measure else "Column"
             selects.append({
-                node_key: {"Expression": {"SourceRef": {"Entity": entity}}, "Property": placement.column},
+                node_key: {"Expression": {"SourceRef": {"Source": entity}}, "Property": placement.column},
                 "Name": select_name,
             })
             projections.setdefault(pbi_role, []).append({"queryRef": select_name, "active": True})
@@ -2250,13 +2260,13 @@ def _build_data_visual_container(placed, classification, resolution, z_index: in
         "objects": objects,
     }
     config = {
-        "name": _guid(),
+        "name": _hex_id(20),
         "layouts": [{"id": 0, "position": {"x": placed.x, "y": placed.y, "z": z_index,
                                             "width": placed.w, "height": placed.h, "tabOrder": z_index}}],
         "singleVisual": single_visual,
     }
     return {"x": placed.x, "y": placed.y, "z": z_index, "width": placed.w, "height": placed.h,
-            "config": _jstr(config)}
+            "config": _jstr(config), "filters": "[]"}
 
 
 def _build_textbox_container(x: int, y: int, w: int, h: int, text: str, z_index: int) -> dict:
@@ -2264,12 +2274,12 @@ def _build_textbox_container(x: int, y: int, w: int, h: int, text: str, z_index:
                  "horizontalTextAlignment": "left"}
     single_visual = {"visualType": "textbox", "objects": {"general": [{"properties": {"paragraphs": [paragraph]}}]}}
     config = {
-        "name": _guid(),
+        "name": _hex_id(20),
         "layouts": [{"id": 0, "position": {"x": x, "y": y, "z": z_index, "width": w, "height": h,
                                             "tabOrder": z_index}}],
         "singleVisual": single_visual,
     }
-    return {"x": x, "y": y, "z": z_index, "width": w, "height": h, "config": _jstr(config)}
+    return {"x": x, "y": y, "z": z_index, "width": w, "height": h, "config": _jstr(config), "filters": "[]"}
 
 
 def _filter_field_expr(resolved) -> dict:
@@ -2322,7 +2332,7 @@ def _build_report_filters(document, registry):
                               f"mapping — recreate manually as a report filter.")
                 continue
             filters.append({
-                "name": _guid(),
+                "name": "Filter" + _hex_id(24),
                 "expression": _filter_field_expr(resolved),
                 "filterType": 1,
                 "type": "Categorical",
@@ -2338,7 +2348,7 @@ def _build_slicer_container(resolved, x: int, y: int, w: int, h: int, z: int) ->
     prototype_query = {
         "Version": 2,
         "From": [{"Name": resolved.table, "Entity": resolved.table, "Type": 0}],
-        "Select": [{node_key: {"Expression": {"SourceRef": {"Entity": resolved.table}}, "Property": resolved.column},
+        "Select": [{node_key: {"Expression": {"SourceRef": {"Source": resolved.table}}, "Property": resolved.column},
                      "Name": select_name}],
         "OrderBy": [],
     }
@@ -2349,11 +2359,11 @@ def _build_slicer_container(resolved, x: int, y: int, w: int, h: int, z: int) ->
         "objects": {},
     }
     config = {
-        "name": _guid(),
+        "name": _hex_id(20),
         "layouts": [{"id": 0, "position": {"x": x, "y": y, "z": z, "width": w, "height": h, "tabOrder": z}}],
         "singleVisual": single_visual,
     }
-    return {"x": x, "y": y, "z": z, "width": w, "height": h, "config": _jstr(config)}
+    return {"x": x, "y": y, "z": z, "width": w, "height": h, "config": _jstr(config), "filters": "[]"}
 
 
 def build_report_layout(document, semantic_model, pages: list):
@@ -2448,10 +2458,12 @@ def build_report_layout(document, semantic_model, pages: list):
                               f"manually, or add an Input Control to the source for automatic mapping."],
                 })
 
+        section_name = "ReportSection" if ordinal == 0 else "ReportSection" + _hex_id(24)
         sections.append({
-            "name": _guid(),
+            "name": section_name,
             "displayName": (page.name or f"Page {ordinal + 1}")[:80],
             "ordinal": ordinal,
+            "displayOption": 1,
             "visualContainers": visual_containers,
             "config": _jstr({"objects": {}}),
             "filters": filters_json,
@@ -2890,6 +2902,7 @@ def _convert_legacy_visual_to_pbir(vc: dict) -> dict:
                 projections.append({
                     "field": {field_key: sel[field_key]},
                     "queryRef": ref["queryRef"],
+                    "nativeQueryRef": sel[field_key].get("Property", ref["queryRef"]),
                     "active": ref.get("active", True),
                 })
             query_state[role] = {"projections": projections}
@@ -2902,8 +2915,8 @@ def _convert_legacy_visual_to_pbir(vc: dict) -> dict:
         visual["objects"] = {"general": objects["general"]}
 
     return {
-        "$schema": f"{_PBIR_SCHEMA_BASE}/visualContainer/2.0.0/schema.json",
-        "name": config.get("name", _guid()),
+        "$schema": f"{_PBIR_SCHEMA_BASE}/visualContainer/2.9.0/schema.json",
+        "name": config.get("name") or _hex_id(20),
         "position": {
             "x": vc["x"], "y": vc["y"], "width": vc["width"], "height": vc["height"],
             "z": vc.get("z", 0), "tabOrder": vc.get("z", 0),
@@ -3100,7 +3113,7 @@ def validate_artifact(schema: dict, layout: dict) -> list:
             if pq is None:
                 continue  # textbox and other non-data visuals
 
-            froms = {f["Name"] for f in pq.get("From", [])}
+            froms = {f["Name"]: f.get("Entity", f["Name"]) for f in pq.get("From", [])}
             select_names: set = set()
             for sel in pq.get("Select", []):
                 sname = sel.get("Name")
@@ -3110,11 +3123,13 @@ def validate_artifact(schema: dict, layout: dict) -> list:
                     issues.append(ValidationIssue("ERROR", "INVALID_SELECT",
                                                    f"Visual '{name}' Select entry '{sname}' has neither Column nor Measure"))
                     continue
-                entity = node.get("Expression", {}).get("SourceRef", {}).get("Entity")
+                source_ref = node.get("Expression", {}).get("SourceRef", {})
+                alias = source_ref.get("Source") or source_ref.get("Entity")
+                entity = froms.get(alias, alias)
                 prop = node.get("Property")
-                if entity not in froms:
+                if alias not in froms:
                     issues.append(ValidationIssue("ERROR", "MISSING_FROM",
-                                                   f"Visual '{name}' Select '{sname}' uses entity '{entity}' not declared in From"))
+                                                   f"Visual '{name}' Select '{sname}' uses entity '{alias}' not declared in From"))
                 table = table_index.get(entity)
                 if table is None:
                     issues.append(ValidationIssue("ERROR", "DANGLING_TABLE_REF",
