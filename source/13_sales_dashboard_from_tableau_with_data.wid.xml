@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Representative SAP BusinessObjects Web Intelligence document source (simplified schema), WITH embedded sample data.
+     Generated as a WebI equivalent of the uploaded Tableau workbook: sales_dashboard.twbx
+       - Tableau datasource "superstore_data" (federated: Orders + People + Returns, joined on Region / Order ID)
+       - Tableau dashboard  "sales_dashabord" containing worksheets "sales_by_region" and "sales_by_year"
+     Data below was extracted from the workbook's embedded .hyper extract (10,194 order rows / 4 regions / 296 returns). -->
+<WebIDocument name="Sales Dashboard" cuid="AXk6wB1cVpRHzL4nT8yQm7J" lastRefresh="2026-08-05T09:00:00Z" sourceWorkbook="sales_dashboard.twbx">
+
+  <DataProviders>
+    <DataProvider id="DP1" name="Superstore Sales Query" type="Universe" universe="Superstore Sales Universe" connection="BOE:Superstore_Prod">
+      <!-- Mirrors the Tableau federated datasource: Orders LEFT JOIN People ON Region, LEFT JOIN Returns ON Order ID -->
+      <SourceJoins>
+        <Join left="Orders" right="People" condition="Orders.Region = People.Region" type="LeftOuter"/>
+        <Join left="Orders" right="Returns" condition="Orders.[Order ID] = Returns.[Order ID]" type="LeftOuter"/>
+      </SourceJoins>
+      <ResultObjects>
+        <Object id="OBJ_ORDERID" name="Order ID" type="Dimension" dataType="Character"/>
+        <Object id="OBJ_ORDERDATE" name="Order Date" type="Dimension" dataType="Date"/>
+        <Object id="OBJ_ORDERYEAR" name="Order Year" type="Dimension" dataType="Number" derivedFrom="Order Date" derivation="Year"/>
+        <Object id="OBJ_SHIPDATE" name="Ship Date" type="Dimension" dataType="Date"/>
+        <Object id="OBJ_SHIPMODE" name="Ship Mode" type="Dimension" dataType="Character"/>
+        <Object id="OBJ_CUSTNAME" name="Customer Name" type="Dimension" dataType="Character"/>
+        <Object id="OBJ_SEGMENT" name="Segment" type="Dimension" dataType="Character"/>
+        <Object id="OBJ_REGION" name="Region" type="Dimension" dataType="Character"/>
+        <Object id="OBJ_REGIONMGR" name="Regional Manager" type="Dimension" dataType="Character" joinedFrom="People"/>
+        <Object id="OBJ_STATE" name="State/Province" type="Dimension" dataType="Character"/>
+        <Object id="OBJ_CITY" name="City" type="Dimension" dataType="Character"/>
+        <Object id="OBJ_CATEGORY" name="Category" type="Dimension" dataType="Character"/>
+        <Object id="OBJ_SUBCAT" name="Sub-Category" type="Dimension" dataType="Character"/>
+        <Object id="OBJ_PRODNAME" name="Product Name" type="Dimension" dataType="Character"/>
+        <Object id="OBJ_RETURNED" name="Returned" type="Dimension" dataType="Character" joinedFrom="Returns" defaultIfUnmatched="No"/>
+        <Object id="OBJ_SALES" name="Sales" type="Measure" dataType="Number" aggregation="Sum"/>
+        <Object id="OBJ_QTY" name="Quantity" type="Measure" dataType="Number" aggregation="Sum"/>
+        <Object id="OBJ_DISCOUNT" name="Discount" type="Measure" dataType="Number" aggregation="Average"/>
+        <Object id="OBJ_PROFIT" name="Profit" type="Measure" dataType="Number" aggregation="Sum"/>
+      </ResultObjects>
+
+      <!-- Sample of the underlying detail grain (full result set = 10,194 rows; showing a representative slice) -->
+      <ResultSet rowCount="10194" sampledRows="20">
+        <Row><Cell object="OBJ_ORDERID">US-2023-103800</Cell><Cell object="OBJ_ORDERDATE">2023-01-03</Cell><Cell object="OBJ_CUSTNAME">Darren Powers</Cell><Cell object="OBJ_SEGMENT">Consumer</Cell><Cell object="OBJ_REGION">Central</Cell><Cell object="OBJ_REGIONMGR">Roxanne Rodriguez</Cell><Cell object="OBJ_CATEGORY">Office Supplies</Cell><Cell object="OBJ_SUBCAT">Paper</Cell><Cell object="OBJ_PRODNAME">Message Book, Wirebound, Four 5 1/2" X 4" Forms/Pg., 200 Dupl. Sets/Book</Cell><Cell object="OBJ_SALES">16.448</Cell><Cell object="OBJ_QTY">2</Cell><Cell object="OBJ_DISCOUNT">0.2</Cell><Cell object="OBJ_PROFIT">5.5512</Cell><Cell object="OBJ_RETURNED">No</Cell></Row>
+        <Row><Cell object="OBJ_ORDERID">US-2023-112326</Cell><Cell object="OBJ_ORDERDATE">2023-01-04</Cell><Cell object="OBJ_CUSTNAME">Phillina Ober</Cell><Cell object="OBJ_SEGMENT">Home Office</Cell><Cell object="OBJ_REGION">Central</Cell><Cell object="OBJ_REGIONMGR">Roxanne Rodriguez</Cell><Cell object="OBJ_CATEGORY">Office Supplies</Cell><Cell object="OBJ_SUBCAT">Binders</Cell><Cell object="OBJ_PRODNAME">GBC Standard Plastic Binding Systems Combs</Cell><Cell object="OBJ_SALES">3.54</Cell><Cell object="OBJ_QTY">2</Cell><Cell object="OBJ_DISCOUNT">0.8</Cell><Cell object="OBJ_PROFIT">-5.487</Cell><Cell object="OBJ_RETURNED">No</Cell></Row>
+        <Row><Cell object="OBJ_ORDERID">US-2023-112326</Cell><Cell object="OBJ_ORDERDATE">2023-01-04</Cell><Cell object="OBJ_CUSTNAME">Phillina Ober</Cell><Cell object="OBJ_SEGMENT">Home Office</Cell><Cell object="OBJ_REGION">Central</Cell><Cell object="OBJ_REGIONMGR">Roxanne Rodriguez</Cell><Cell object="OBJ_CATEGORY">Office Supplies</Cell><Cell object="OBJ_SUBCAT">Labels</Cell><Cell object="OBJ_PRODNAME">Avery 508</Cell><Cell object="OBJ_SALES">11.784</Cell><Cell object="OBJ_QTY">3</Cell><Cell object="OBJ_DISCOUNT">0.2</Cell><Cell object="OBJ_PROFIT">4.2717</Cell><Cell object="OBJ_RETURNED">No</Cell></Row>
+        <Row><Cell object="OBJ_ORDERID">US-2023-112326</Cell><Cell object="OBJ_ORDERDATE">2023-01-04</Cell><Cell object="OBJ_CUSTNAME">Phillina Ober</Cell><Cell object="OBJ_SEGMENT">Home Office</Cell><Cell object="OBJ_REGION">Central</Cell><Cell object="OBJ_REGIONMGR">Roxanne Rodriguez</Cell><Cell object="OBJ_CATEGORY">Office Supplies</Cell><Cell object="OBJ_SUBCAT">Storage</Cell><Cell object="OBJ_PRODNAME">SAFCO Boltless Steel Shelving</Cell><Cell object="OBJ_SALES">272.736</Cell><Cell object="OBJ_QTY">3</Cell><Cell object="OBJ_DISCOUNT">0.2</Cell><Cell object="OBJ_PROFIT">-64.7748</Cell><Cell object="OBJ_RETURNED">No</Cell></Row>
+        <Row><Cell object="OBJ_ORDERID">US-2023-141817</Cell><Cell object="OBJ_ORDERDATE">2023-01-05</Cell><Cell object="OBJ_CUSTNAME">Mick Brown</Cell><Cell object="OBJ_SEGMENT">Consumer</Cell><Cell object="OBJ_REGION">East</Cell><Cell object="OBJ_REGIONMGR">Chuck Magee</Cell><Cell object="OBJ_CATEGORY">Office Supplies</Cell><Cell object="OBJ_SUBCAT">Art</Cell><Cell object="OBJ_PRODNAME">Avery Hi-Liter EverBold Pen Style Fluorescent Highlighters, 4/Pack</Cell><Cell object="OBJ_SALES">19.536</Cell><Cell object="OBJ_QTY">3</Cell><Cell object="OBJ_DISCOUNT">0.2</Cell><Cell object="OBJ_PROFIT">4.884</Cell><Cell object="OBJ_RETURNED">No</Cell></Row>
+        <Row><Cell object="OBJ_ORDERID">US-2023-167199</Cell><Cell object="OBJ_ORDERDATE">2023-01-06</Cell><Cell object="OBJ_CUSTNAME">Maria Etezadi</Cell><Cell object="OBJ_SEGMENT">Home Office</Cell><Cell object="OBJ_REGION">South</Cell><Cell object="OBJ_REGIONMGR">Fred Suzuki</Cell><Cell object="OBJ_CATEGORY">Furniture</Cell><Cell object="OBJ_SUBCAT">Chairs</Cell><Cell object="OBJ_PRODNAME">Global Deluxe High-Back Manager's Chair</Cell><Cell object="OBJ_SALES">2573.82</Cell><Cell object="OBJ_QTY">9</Cell><Cell object="OBJ_DISCOUNT">0.0</Cell><Cell object="OBJ_PROFIT">746.4078</Cell><Cell object="OBJ_RETURNED">No</Cell></Row>
+        <Row><Cell object="OBJ_ORDERID">US-2023-167199</Cell><Cell object="OBJ_ORDERDATE">2023-01-06</Cell><Cell object="OBJ_CUSTNAME">Maria Etezadi</Cell><Cell object="OBJ_SEGMENT">Home Office</Cell><Cell object="OBJ_REGION">South</Cell><Cell object="OBJ_REGIONMGR">Fred Suzuki</Cell><Cell object="OBJ_CATEGORY">Office Supplies</Cell><Cell object="OBJ_SUBCAT">Art</Cell><Cell object="OBJ_PRODNAME">Rogers Handheld Barrel Pencil Sharpener</Cell><Cell object="OBJ_SALES">5.48</Cell><Cell object="OBJ_QTY">2</Cell><Cell object="OBJ_DISCOUNT">0.0</Cell><Cell object="OBJ_PROFIT">1.4796</Cell><Cell object="OBJ_RETURNED">No</Cell></Row>
+        <Row><Cell object="OBJ_ORDERID">US-2023-106054</Cell><Cell object="OBJ_ORDERDATE">2023-01-06</Cell><Cell object="OBJ_CUSTNAME">Jack O'Briant</Cell><Cell object="OBJ_SEGMENT">Corporate</Cell><Cell object="OBJ_REGION">South</Cell><Cell object="OBJ_REGIONMGR">Fred Suzuki</Cell><Cell object="OBJ_CATEGORY">Office Supplies</Cell><Cell object="OBJ_SUBCAT">Art</Cell><Cell object="OBJ_PRODNAME">Dixon Prang Watercolor Pencils, 10-Color Set with Brush</Cell><Cell object="OBJ_SALES">12.78</Cell><Cell object="OBJ_QTY">3</Cell><Cell object="OBJ_DISCOUNT">0.0</Cell><Cell object="OBJ_PROFIT">5.2398</Cell><Cell object="OBJ_RETURNED">No</Cell></Row>
+        <Row><Cell object="OBJ_ORDERID">US-2023-167199</Cell><Cell object="OBJ_ORDERDATE">2023-01-06</Cell><Cell object="OBJ_CUSTNAME">Maria Etezadi</Cell><Cell object="OBJ_SEGMENT">Home Office</Cell><Cell object="OBJ_REGION">South</Cell><Cell object="OBJ_REGIONMGR">Fred Suzuki</Cell><Cell object="OBJ_CATEGORY">Office Supplies</Cell><Cell object="OBJ_SUBCAT">Binders</Cell><Cell object="OBJ_PRODNAME">Ibico Hi-Tech Manual Binding System</Cell><Cell object="OBJ_SALES">609.98</Cell><Cell object="OBJ_QTY">2</Cell><Cell object="OBJ_DISCOUNT">0.0</Cell><Cell object="OBJ_PROFIT">274.491</Cell><Cell object="OBJ_RETURNED">No</Cell></Row>
+        <Row><Cell object="OBJ_ORDERID">US-2023-130813</Cell><Cell object="OBJ_ORDERDATE">2023-01-06</Cell><Cell object="OBJ_CUSTNAME">Lycoris Saunders</Cell><Cell object="OBJ_SEGMENT">Consumer</Cell><Cell object="OBJ_REGION">West</Cell><Cell object="OBJ_REGIONMGR">Sadie Pawthorne</Cell><Cell object="OBJ_CATEGORY">Office Supplies</Cell><Cell object="OBJ_SUBCAT">Paper</Cell><Cell object="OBJ_PRODNAME">Xerox 225</Cell><Cell object="OBJ_SALES">19.44</Cell><Cell object="OBJ_QTY">3</Cell><Cell object="OBJ_DISCOUNT">0.0</Cell><Cell object="OBJ_PROFIT">9.3312</Cell><Cell object="OBJ_RETURNED">No</Cell></Row>
+        <Row><Cell object="OBJ_ORDERID">US-2023-167199</Cell><Cell object="OBJ_ORDERDATE">2023-01-06</Cell><Cell object="OBJ_CUSTNAME">Maria Etezadi</Cell><Cell object="OBJ_SEGMENT">Home Office</Cell><Cell object="OBJ_REGION">South</Cell><Cell object="OBJ_REGIONMGR">Fred Suzuki</Cell><Cell object="OBJ_CATEGORY">Technology</Cell><Cell object="OBJ_SUBCAT">Phones</Cell><Cell object="OBJ_PRODNAME">Wireless Extenders zBoost YX545 SOHO Signal Booster</Cell><Cell object="OBJ_SALES">755.96</Cell><Cell object="OBJ_QTY">4</Cell><Cell object="OBJ_DISCOUNT">0.0</Cell><Cell object="OBJ_PROFIT">204.1092</Cell><Cell object="OBJ_RETURNED">No</Cell></Row>
+        <Row><Cell object="OBJ_ORDERID">US-2023-105417</Cell><Cell object="OBJ_ORDERDATE">2023-01-07</Cell><Cell object="OBJ_CUSTNAME">Vivek Sundaresam</Cell><Cell object="OBJ_SEGMENT">Consumer</Cell><Cell object="OBJ_REGION">Central</Cell><Cell object="OBJ_REGIONMGR">Roxanne Rodriguez</Cell><Cell object="OBJ_CATEGORY">Furniture</Cell><Cell object="OBJ_SUBCAT">Furnishings</Cell><Cell object="OBJ_PRODNAME">Howard Miller 14-1/2" Diameter Chrome Round Wall Clock</Cell><Cell object="OBJ_SALES">76.728</Cell><Cell object="OBJ_QTY">3</Cell><Cell object="OBJ_DISCOUNT">0.6</Cell><Cell object="OBJ_PROFIT">-53.7096</Cell><Cell object="OBJ_RETURNED">No</Cell></Row>
+        <Row><Cell object="OBJ_ORDERID">US-2023-105417</Cell><Cell object="OBJ_ORDERDATE">2023-01-07</Cell><Cell object="OBJ_CUSTNAME">Vivek Sundaresam</Cell><Cell object="OBJ_SEGMENT">Consumer</Cell><Cell object="OBJ_REGION">Central</Cell><Cell object="OBJ_REGIONMGR">Roxanne Rodriguez</Cell><Cell object="OBJ_CATEGORY">Office Supplies</Cell><Cell object="OBJ_SUBCAT">Binders</Cell><Cell object="OBJ_PRODNAME">Acco Four Pocket Poly Ring Binder with Label Holder, Smoke, 1"</Cell><Cell object="OBJ_SALES">10.43</Cell><Cell object="OBJ_QTY">7</Cell><Cell object="OBJ_DISCOUNT">0.8</Cell><Cell object="OBJ_PROFIT">-18.2525</Cell><Cell object="OBJ_RETURNED">No</Cell></Row>
+        <Row><Cell object="OBJ_ORDERID">US-2023-100762</Cell><Cell object="OBJ_ORDERDATE">2023-01-08</Cell><Cell object="OBJ_CUSTNAME">Ken Lonsdale</Cell><Cell object="OBJ_SEGMENT">Consumer</Cell><Cell object="OBJ_REGION">West</Cell><Cell object="OBJ_REGIONMGR">Sadie Pawthorne</Cell><Cell object="OBJ_CATEGORY">Technology</Cell><Cell object="OBJ_SUBCAT">Phones</Cell><Cell object="OBJ_PRODNAME">Samsung Convoy 3</Cell><Cell object="OBJ_SALES">221.98</Cell><Cell object="OBJ_QTY">2</Cell><Cell object="OBJ_DISCOUNT">0.0</Cell><Cell object="OBJ_PROFIT">62.1544</Cell><Cell object="OBJ_RETURNED">Yes</Cell></Row>
+        <Row><Cell object="OBJ_ORDERID">US-2023-135405</Cell><Cell object="OBJ_ORDERDATE">2023-01-09</Cell><Cell object="OBJ_CUSTNAME">Melanie Seite</Cell><Cell object="OBJ_SEGMENT">Consumer</Cell><Cell object="OBJ_REGION">Central</Cell><Cell object="OBJ_REGIONMGR">Roxanne Rodriguez</Cell><Cell object="OBJ_CATEGORY">Office Supplies</Cell><Cell object="OBJ_SUBCAT">Art</Cell><Cell object="OBJ_PRODNAME">Newell 312</Cell><Cell object="OBJ_SALES">9.344</Cell><Cell object="OBJ_QTY">2</Cell><Cell object="OBJ_DISCOUNT">0.2</Cell><Cell object="OBJ_PROFIT">1.168</Cell><Cell object="OBJ_RETURNED">No</Cell></Row>
+        <Row><Cell object="OBJ_ORDERID">US-2023-135405</Cell><Cell object="OBJ_ORDERDATE">2023-01-09</Cell><Cell object="OBJ_CUSTNAME">Melanie Seite</Cell><Cell object="OBJ_SEGMENT">Consumer</Cell><Cell object="OBJ_REGION">Central</Cell><Cell object="OBJ_REGIONMGR">Roxanne Rodriguez</Cell><Cell object="OBJ_CATEGORY">Technology</Cell><Cell object="OBJ_SUBCAT">Accessories</Cell><Cell object="OBJ_PRODNAME">Memorex Micro Travel Drive 8 GB</Cell><Cell object="OBJ_SALES">31.2</Cell><Cell object="OBJ_QTY">3</Cell><Cell object="OBJ_DISCOUNT">0.2</Cell><Cell object="OBJ_PROFIT">9.75</Cell><Cell object="OBJ_RETURNED">No</Cell></Row>
+        <Row><Cell object="OBJ_ORDERID">US-2023-149020</Cell><Cell object="OBJ_ORDERDATE">2023-01-10</Cell><Cell object="OBJ_CUSTNAME">Anthony Jacobs</Cell><Cell object="OBJ_SEGMENT">Corporate</Cell><Cell object="OBJ_REGION">South</Cell><Cell object="OBJ_REGIONMGR">Fred Suzuki</Cell><Cell object="OBJ_CATEGORY">Furniture</Cell><Cell object="OBJ_SUBCAT">Furnishings</Cell><Cell object="OBJ_PRODNAME">Howard Miller 11-1/2" Diameter Ridgewood Wall Clock</Cell><Cell object="OBJ_SALES">51.94</Cell><Cell object="OBJ_QTY">1</Cell><Cell object="OBJ_DISCOUNT">0.0</Cell><Cell object="OBJ_PROFIT">21.2954</Cell><Cell object="OBJ_RETURNED">No</Cell></Row>
+        <Row><Cell object="OBJ_ORDERID">US-2023-149020</Cell><Cell object="OBJ_ORDERDATE">2023-01-10</Cell><Cell object="OBJ_CUSTNAME">Anthony Jacobs</Cell><Cell object="OBJ_SEGMENT">Corporate</Cell><Cell object="OBJ_REGION">South</Cell><Cell object="OBJ_REGIONMGR">Fred Suzuki</Cell><Cell object="OBJ_CATEGORY">Office Supplies</Cell><Cell object="OBJ_SUBCAT">Labels</Cell><Cell object="OBJ_PRODNAME">Avery 482</Cell><Cell object="OBJ_SALES">2.89</Cell><Cell object="OBJ_QTY">1</Cell><Cell object="OBJ_DISCOUNT">0.0</Cell><Cell object="OBJ_PROFIT">1.3583</Cell><Cell object="OBJ_RETURNED">No</Cell></Row>
+        <Row><Cell object="OBJ_ORDERID">US-2026-138688</Cell><Cell object="OBJ_ORDERDATE">2026-06-12</Cell><Cell object="OBJ_CUSTNAME">Claire Gute</Cell><Cell object="OBJ_SEGMENT">Consumer</Cell><Cell object="OBJ_REGION">South</Cell><Cell object="OBJ_REGIONMGR">Fred Suzuki</Cell><Cell object="OBJ_CATEGORY">Office Supplies</Cell><Cell object="OBJ_SUBCAT">Labels</Cell><Cell object="OBJ_PRODNAME">Avery 5</Cell><Cell object="OBJ_SALES">14.62</Cell><Cell object="OBJ_QTY">2</Cell><Cell object="OBJ_DISCOUNT">0.0</Cell><Cell object="OBJ_PROFIT">6.8714</Cell><Cell object="OBJ_RETURNED">No</Cell></Row>
+        <Row><Cell object="OBJ_ORDERID">US-2026-108966</Cell><Cell object="OBJ_ORDERDATE">2026-12-30</Cell><Cell object="OBJ_CUSTNAME">Nathan Cano</Cell><Cell object="OBJ_SEGMENT">Consumer</Cell><Cell object="OBJ_REGION">West</Cell><Cell object="OBJ_REGIONMGR">Sadie Pawthorne</Cell><Cell object="OBJ_CATEGORY">Furniture</Cell><Cell object="OBJ_SUBCAT">Furnishings</Cell><Cell object="OBJ_PRODNAME">Tenex 46" x 60" Computer Anti-Static Chairmat</Cell><Cell object="OBJ_SALES">91.056</Cell><Cell object="OBJ_QTY">3</Cell><Cell object="OBJ_DISCOUNT">0.2</Cell><Cell object="OBJ_PROFIT">17.0730</Cell><Cell object="OBJ_RETURNED">No</Cell></Row>
+      </ResultSet>
+
+      <!-- Pre-aggregated results powering the two chart blocks below, computed from the full 10,194-row extract -->
+      <AggregatedResults>
+        <Aggregate name="Sales by Region" groupBy="OBJ_REGION" measure="OBJ_SALES" function="Sum">
+          <Row><Cell dim="West">739813.61</Cell></Row>
+          <Row><Cell dim="East">691828.17</Cell></Row>
+          <Row><Cell dim="Central">503170.67</Cell></Row>
+          <Row><Cell dim="South">391721.91</Cell></Row>
+        </Aggregate>
+        <Aggregate name="Sales by Year" groupBy="OBJ_ORDERYEAR" measure="OBJ_SALES" function="Sum">
+          <Row><Cell dim="2023">494040.21</Cell></Row>
+          <Row><Cell dim="2024">472993.03</Cell></Row>
+          <Row><Cell dim="2025">613933.58</Cell></Row>
+          <Row><Cell dim="2026">745567.53</Cell></Row>
+        </Aggregate>
+      </AggregatedResults>
+    </DataProvider>
+  </DataProviders>
+
+  <Reports>
+    <Report name="Sales Dashboard" tabOrder="1">
+      <!-- Tableau dashboard size was 1000x800 (fixed); mapped to A4 landscape with two stacked blocks -->
+      <PageSetup orientation="Landscape" size="A4"/>
+
+      <Sections>
+        <Section id="SEC_ROOT" breakOn="none">
+          <Blocks>
+
+            <!-- Equivalent of Tableau worksheet "sales_by_region" -->
+            <Block id="BLK_REGION" type="Chart" chartType="Bar" name="Sales by Region" position="x=0,y=0,w=630,h=250">
+              <Axis role="Category" object="OBJ_REGION"/>
+              <Axis role="Value" object="OBJ_SALES" function="Sum" format="$#,##0"/>
+              <SortOrder>
+                <Sort object="OBJ_SALES" direction="Descending"/>
+              </SortOrder>
+              <!-- Resolved bar values: West 739,813.61 | East 691,828.17 | Central 503,170.67 | South 391,721.91 -->
+            </Block>
+
+            <!-- Equivalent of Tableau worksheet "sales_by_year" -->
+            <Block id="BLK_YEAR" type="Chart" chartType="Line" name="Sales by Year" position="x=0,y=260,w=630,h=250">
+              <Axis role="Category" object="OBJ_ORDERYEAR"/>
+              <Axis role="Value" object="OBJ_SALES" function="Sum" format="$#,##0"/>
+              <!-- Resolved line values: 2023 494,040.21 | 2024 472,993.03 | 2025 613,933.58 | 2026 745,567.53 -->
+            </Block>
+
+          </Blocks>
+        </Section>
+      </Sections>
+    </Report>
+  </Reports>
+
+</WebIDocument>
