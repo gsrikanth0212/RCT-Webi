@@ -3014,6 +3014,13 @@ def write_pbip(document, semantic_model, output_dir: Path, project_name: str):
     }), encoding="utf-8")
     (report_dir / "definition" / "report.json").write_text(_jstr({
         "$schema": f"{_PBIR_SCHEMA_BASE}/report/3.3.0/schema.json",
+        "themeCollection": {
+            "baseTheme": {
+                "name": "CY26SU05",
+                "reportVersionAtImport": {"visual": "2.9.0", "report": "3.3.0", "page": "2.3.1"},
+                "type": "SharedResources",
+            }
+        },
         "settings": {
             "useStylableVisualContainerHeader": True,
             "exportDataMode": "AllowSummarized",
