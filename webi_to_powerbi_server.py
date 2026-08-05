@@ -58,12 +58,10 @@ from __future__ import annotations
 
 import argparse
 import dataclasses
-import io
 import json
 import os
 import queue
 import re
-import struct
 import sys
 import tempfile
 import threading
@@ -2531,123 +2529,6 @@ def build_diagram_layout(semantic_model) -> dict:
     }
 
 
-def _build_section1_m(tables: list) -> str:
-    """Render every table's M partition expression as a `shared` member of
-    a Section1 document — the Power Query "Formulas" that the DataMashup
-    part's Package Parts must contain (see `build_data_mashup` docstring)."""
-    lines = ["section Section1;", ""]
-    for t in tables:
-        for part in t.get("partitions", []):
-            source = part.get("source", {})
-            if source.get("type") != "m":
-                continue
-            body = "\n".join(source.get("expression", []))
-            lines.append(f"shared {_m_quote_identifier(t['name'])} = {body};")
-            lines.append("")
-    return "\n".join(lines)
-
-
-def _build_package_parts_zip(section1_text: str) -> bytes:
-    """Only `[Content_Types].xml` + `Formulas/Section1.m` — no `Config/
-    Package.xml`. Neither of the two independent [MS-QDEFF] readers this
-    was cross-checked against (excel-datamashup, pbixray) reads or needs
-    Config/Package.xml; it was a guessed, unverified addition with no
-    evidence it's required, so it's been removed rather than left in as
-    unverified content that only adds risk. Content-type strings are left
-    empty, matching the exact pattern already proven to open correctly for
-    several other parts in this same .pbit package (see write_pbit()'s own
-    [Content_Types].xml), instead of guessing a specific MIME type for `.m`."""
-    content_types = (
-        '<?xml version="1.0" encoding="utf-8"?>'
-        '<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">'
-        '<Default Extension="m" ContentType=""/>'
-        '</Types>'
-    )
-    buf = io.BytesIO()
-    with zipfile.ZipFile(buf, "w", zipfile.ZIP_DEFLATED) as zf:
-        zf.writestr("[Content_Types].xml", content_types.encode("utf-8"))
-        zf.writestr("Formulas/Section1.m", section1_text.encode("utf-8"))
-    return buf.getvalue()
-
-
-def _build_metadata_stream() -> bytes:
-    """The [MS-QDEFF] Metadata sub-stream: Version(4) | MetadataXmlLength(4)
-    | MetadataXML | ContentLength(4) | Content(OPC zip). Neither Microsoft's
-    own `excel-datamashup` reference implementation nor the independent
-    `pbixray` reader deeply validate this sub-stream's XML schema — the
-    query/parameter classification that actually matters for loading lives
-    in Section1.m's own `meta [...]` records instead — so a minimal, valid
-    placeholder here is intentional, not a guess at a schema we can't verify."""
-    metadata_xml = (
-        '<?xml version="1.0" encoding="utf-8"?>'
-        '<SectionMetadata xmlns="http://schemas.microsoft.com/DataMashup"/>'
-    ).encode("utf-8")
-
-    inner_buf = io.BytesIO()
-    with zipfile.ZipFile(inner_buf, "w", zipfile.ZIP_DEFLATED) as zf:
-        zf.writestr(
-            "[Content_Types].xml",
-            ('<?xml version="1.0" encoding="utf-8"?>'
-             '<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">'
-             '<Default Extension="xml" ContentType="text/xml"/>'
-             '</Types>').encode("utf-8"),
-        )
-    content = inner_buf.getvalue()
-
-    return b"".join([
-        struct.pack("<I", 0),
-        struct.pack("<I", len(metadata_xml)), metadata_xml,
-        struct.pack("<I", len(content)), content,
-    ])
-
-
-def build_data_mashup(tables: list) -> bytes:
-    """Build the `.pbit` package's `DataMashup` part: the [MS-QDEFF]
-    ("Query Data File Format") binary stream that carries the actual Power
-    Query "Formulas" document. A legacy `.pbit`'s import-mode tables are
-    processed through Power BI Desktop's "Import Template" flow, which
-    loads and validates this part specifically (independent of whatever
-    `DataModelSchema` says) — its total absence is what produced "This file
-    is corrupted" on every previously generated file, regardless of how
-    correct the M inside DataModelSchema's own partition expressions was.
-
-    Byte layout (little-endian, confirmed against two independent, actively
-    maintained open-source implementations of [MS-QDEFF] — Microsoft's own
-    `excel-datamashup` and `pbixray` — not a single unverified source):
-
-        Version                    uint32 = 0
-        PackagePartsLength         uint32
-        PackageParts               OPC zip: [Content_Types].xml, Config/Package.xml,
-                                    Formulas/Section1.m
-        PermissionsLength          uint32
-        Permissions                UTF-8 XML (PermissionList)
-        MetadataLength             uint32
-        Metadata                   Version(4) | XmlLength(4) | Xml | ContentLength(4) | Content(OPC zip)
-        PermissionBindingsLength   uint32
-        PermissionBindings         (empty — DPAPI-protected, not applicable to a freshly generated file)
-    """
-    section1_text = _build_section1_m(tables)
-    package_parts = _build_package_parts_zip(section1_text)
-    permissions = (
-        '<?xml version="1.0" encoding="utf-8"?>\r\n'
-        '<PermissionList xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">\r\n'
-        '\t<CanEvaluateFuturePackages>false</CanEvaluateFuturePackages>\r\n'
-        '\t<FirewallEnabled>true</FirewallEnabled>\r\n'
-        '\t<WorkbookGroupType xsi:nil="true" />\r\n'
-        '</PermissionList>'
-    ).encode("utf-8")
-    metadata = _build_metadata_stream()
-    permission_bindings = b""
-
-    return b"".join([
-        struct.pack("<I", 0),
-        struct.pack("<I", len(package_parts)), package_parts,
-        struct.pack("<I", len(permissions)), permissions,
-        struct.pack("<I", len(metadata)), metadata,
-        struct.pack("<I", len(permission_bindings)), permission_bindings,
-    ])
-
-
 def write_pbit(document, semantic_model, output_path: Path):
     """End-to-end: build layout from the IR, assemble the three JSON
     parts, and write a `.pbit` zip at `output_path`.
@@ -2659,8 +2540,15 @@ def write_pbit(document, semantic_model, output_path: Path):
     layout, generation_notes = build_report_layout(document, semantic_model, pages)
     schema = build_data_model_schema(document, semantic_model)
     diagram = build_diagram_layout(semantic_model)
-    mashup_bytes = build_data_mashup(semantic_model.tables)
 
+    # No `DataMashup` part: confirmed against this repo's own proven-working
+    # tableau_pbi_server.py (read-only reference; its .pbit opens correctly
+    # in Power BI Desktop) that a `.pbit` whose tables use "type": "m"
+    # partitions defined directly in DataModelSchema needs no separate
+    # DataMashup/Formulas OPC package at all — that engine never writes one.
+    # This project's own hand-built [MS-QDEFF] DataMashup binary was always
+    # a best-effort reconstruction of an undocumented format; dropping it
+    # removes that entire unverified binary from the package.
     content_types = (
         '<?xml version="1.0" encoding="utf-8"?>'
         '<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">'
@@ -2672,7 +2560,6 @@ def write_pbit(document, semantic_model, output_path: Path):
         '<Override PartName="/Report/Layout" ContentType=""/>'
         '<Override PartName="/Settings" ContentType="application/json"/>'
         '<Override PartName="/Metadata" ContentType="application/json"/>'
-        '<Override PartName="/DataMashup" ContentType=""/>'
         '</Types>'
     )
     version_str = "1.21"
@@ -2693,7 +2580,6 @@ def write_pbit(document, semantic_model, output_path: Path):
             zf.writestr("DataModelSchema", _jstr(schema).encode("utf-16-le"))
             zf.writestr("DiagramLayout", _jstr(diagram).encode("utf-16-le"))
             zf.writestr("Report/Layout", _jstr(layout).encode("utf-16-le"))
-            zf.writestr("DataMashup", mashup_bytes)
         os.replace(tmp_path, output_path)
     finally:
         if os.path.exists(tmp_path):
@@ -2705,11 +2591,13 @@ def write_pbit(document, semantic_model, output_path: Path):
 # ─────────────────────────────────────────────────────────────────────────
 # Power BI Project (PBIP) + TMDL output — the primary/recommended path.
 # ─────────────────────────────────────────────────────────────────────────
-# write_pbit() above embeds Power Query in the undocumented, proprietary
-# "DataMashup" binary stream ([MS-QDEFF]), which real Power BI Desktop
-# versions have proven very hard to satisfy without a live Desktop to test
-# against. write_pbip() instead emits Microsoft's modern, fully
-# text-based, publicly documented project format: the semantic model is a
+# write_pbit() above writes "type": "m" partitions directly into
+# DataModelSchema and no longer embeds a separate "DataMashup" binary
+# stream ([MS-QDEFF]) at all — this repo's own proven-working
+# tableau_pbi_server.py confirms that undocumented, proprietary format
+# isn't required for a legacy .pbit to open. write_pbip() instead emits
+# Microsoft's modern, fully text-based, publicly documented project
+# format: the semantic model is a
 # folder of plain-text .tmdl files (Power Query M source included
 # verbatim — no binary encoding at all), and the report is a folder of
 # plain JSON files (one page.json / visual.json per visual) instead of one
