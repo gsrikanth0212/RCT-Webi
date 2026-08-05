@@ -2877,6 +2877,30 @@ def _convert_legacy_section_to_page(section: dict) -> dict:
     }
 
 
+def _pbir_field_entity(node: dict) -> dict:
+    """PBIR `field` expressions (visual.json's query.queryState.*.projections
+    entries) reference their table via `SourceRef.Entity` directly — never
+    the `Source`-alias form the legacy .pbit `prototypeQuery.Select` uses.
+    Confirmed against Microsoft's official PBIR authoring reference: every
+    `field` example across its cartesian/table/card/slicer topic files uses
+    `Entity`; alias resolution is documented as specific to filter `Where`
+    clauses and the legacy semantic-query `prototypeQuery`, not `field`.
+    Since this generator's own `From` list always sets `Name == Entity` for
+    every table, converting the `Select` entry built for the legacy layout
+    back to `Entity` here is a safe 1:1 key rename, not a lookup."""
+    node = dict(node)
+    expr = node.get("Expression")
+    if isinstance(expr, dict):
+        expr = dict(expr)
+        source_ref = expr.get("SourceRef")
+        if isinstance(source_ref, dict) and "Source" in source_ref:
+            source_ref = dict(source_ref)
+            source_ref["Entity"] = source_ref.pop("Source")
+            expr["SourceRef"] = source_ref
+        node["Expression"] = expr
+    return node
+
+
 def _convert_legacy_visual_to_pbir(vc: dict) -> dict:
     """Reshape one legacy visualContainer (built by build_report_layout(),
     validated by webi_validator.py exactly as before) into a PBIR
@@ -2900,7 +2924,7 @@ def _convert_legacy_visual_to_pbir(vc: dict) -> dict:
                     continue
                 field_key = "Measure" if "Measure" in sel else "Column"
                 projections.append({
-                    "field": {field_key: sel[field_key]},
+                    "field": {field_key: _pbir_field_entity(sel[field_key])},
                     "queryRef": ref["queryRef"],
                     "nativeQueryRef": sel[field_key].get("Property", ref["queryRef"]),
                     "active": ref.get("active", True),
