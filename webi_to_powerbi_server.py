@@ -2487,7 +2487,11 @@ def build_report_layout(document, semantic_model, pages: list):
 def build_data_model_schema(document, semantic_model) -> dict:
     return {
         "name": "SemanticModel",
-        "compatibilityLevel": 1567,
+        # 1567 (this migration's own earlier guess) vs 1550: confirmed
+        # against this repo's own proven-working tableau_pbi_server.py,
+        # which hardcodes 1550 for the exact same legacy-.pbit
+        # DataModelSchema part and opens correctly in Power BI Desktop.
+        "compatibilityLevel": 1550,
         "model": {
             "culture": "en-US",
             "dataAccessOptions": {"legacyRedirects": True, "returnErrorValuesAsNull": True},
@@ -2498,7 +2502,12 @@ def build_data_model_schema(document, semantic_model) -> dict:
             "annotations": [
                 {"name": "PBI_QueryOrder", "value": _jstr([t["name"] for t in semantic_model.tables])},
                 {"name": "__PBI_TimeIntelligenceEnabled", "value": "0"},
-                {"name": "PBIDesktopVersion", "value": "WebI-Migration-Engine 1.0"},
+                # Real Power BI Desktop release-version format
+                # ("X.Y.Z.W (YY.MM)"), matching tableau_pbi_server.py's own
+                # PBIDesktopVersion annotation — not a made-up engine label,
+                # which risked being exactly what a "version not supported"
+                # check would reject.
+                {"name": "PBIDesktopVersion", "value": "2.128.952.0 (24.04)"},
             ],
         },
     }
